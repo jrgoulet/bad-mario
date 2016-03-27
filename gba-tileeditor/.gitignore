@@ -1,0 +1,8 @@
+# ignore Qt generated thingies
+Makefile
+qrc_icons.cpp
+ui_*.h
+moc_*.cpp
+*.o
+gba-tileeditor
+*.gba
