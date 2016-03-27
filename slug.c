@@ -158,7 +158,7 @@ void setup_background() {
             (background_width * background_height) / 2);
 
     /* set all control the bits in this register */
-    *bg0_control = 0 |    /* priority, 0 is highest, 3 is lowest */
+    *bg0_control = 1 |    /* priority, 0 is highest, 3 is lowest */
         (0 << 2)  |       /* the char block the image data is stored in */
         (0 << 6)  |       /* the mosaic flag */
         (1 << 7)  |       /* color mode, 0 is 16 colors, 1 is 256 colors */
@@ -168,6 +168,19 @@ void setup_background() {
 
     /* load the tile data into screen block 16 */
     memcpy16_dma((unsigned short*) screen_block(16), (unsigned short*) map, map_width * map_height);
+
+    /* set all control the bits in this register */
+    *bg1_control = 0 |    /* priority, 0 is highest, 3 is lowest */
+        (0 << 2)  |         /*the char block the image data is stored in */
+        (0 << 6)  |         /* the mosaic flag */
+        (1 << 7)  |         /* color mode, 0 is 16 colors, 1 is 256 colors */
+        (24 << 8) |         /* the screen block the tile data is stored in */
+        (1 << 13) |         /* wrapping flag */
+        (0 << 14);          /* bg size, 0 is 256 */
+
+    /* load the tile data into screen block 24 */
+    memcpy16_dma((unsigned short*) screen_block(24), (unsigned short*) maptrans, maptrans_width * maptrans_height);
+
 }
 
 /* just kill time */
@@ -254,7 +267,7 @@ struct Sprite* sprite_init(int x, int y, enum SpriteSize size,
     return &sprites[index];
 }
 
-/* update all of the spries on the screen */
+/* update all of the sprites on the screen */
 void sprite_update_all() {
     /* copy them all over */
     memcpy16_dma((unsigned short*) sprite_attribute_memory, (unsigned short*) sprites, NUM_SPRITES * 4);
@@ -331,13 +344,15 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
 }
 
 /* setup the sprite image and palette */
-void setup_sprite_image() {
+
+
+//void setup_sprite_image() {
     /* load the palette from the image into palette memory*/
-    memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) koopa_palette, PALETTE_SIZE);
+//    memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) koopa_palette, PALETTE_SIZE);
 
     /* load the image into char block 0 */
-    memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) koopa_data, (koopa_width * koopa_height) / 2);
-}
+//    memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) koopa_data, (koopa_width * koopa_height) / 2);
+//}
 
 /* a struct for the koopa's logic and behavior */
 struct Koopa {
@@ -432,20 +447,20 @@ void koopa_update(struct Koopa* koopa) {
 /* the main function */
 int main( ) {
     /* we set the mode to mode 0 with bg0 on */
-    *display_control = MODE0 | BG0_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;
+    *display_control = MODE0 | BG0_ENABLE | BG1_ENABLE /*| SPRITE_ENABLE | SPRITE_MAP_1D*/;
 
     /* setup the background 0 */
     setup_background();
 
     /* setup the sprite image data */
-    setup_sprite_image();
+   // setup_sprite_image();
 
     /* clear all the sprites on screen now */
-    sprite_clear();
+   // sprite_clear();
 
     /* create the koopa */
-    struct Koopa koopa;
-    koopa_init(&koopa);
+/*    struct Koopa koopa;
+    koopa_init(&koopa);        */
 
     /* set initial scroll to 0 */
     int xscroll = 0;
@@ -453,10 +468,10 @@ int main( ) {
     /* loop forever */
     while (1) {
         /* update the koopa */
-        koopa_update(&koopa);
+        //koopa_update(&koopa);
 
         /* now the arrow keys move the koopa */
-        if (button_pressed(BUTTON_RIGHT)) {
+/*        if (button_pressed(BUTTON_RIGHT)) {
             if (koopa_right(&koopa)) {
                 xscroll++;
             }
@@ -467,11 +482,12 @@ int main( ) {
         } else {
             koopa_stop(&koopa);
         }
-
+*/
         /* wait for vblank before scrolling and moving sprites */
         wait_vblank();
-        *bg0_x_scroll = xscroll;
-        sprite_update_all();
+        *bg0_x_scroll = xscroll/2;
+        *bg1_x_scroll = xscroll*2;
+        //sprite_update_all();
 
         /* delay some */
         delay(300);
