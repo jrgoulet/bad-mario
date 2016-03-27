@@ -1,5 +1,6 @@
 /*  
  * Authors: Kenny Lyon, Joe Goulet
+ * Professor: Ian Finlayson
  * more header stuff later
  *
  * slug.c
