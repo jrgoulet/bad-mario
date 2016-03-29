@@ -16,7 +16,7 @@
 /* include the sprite image we are using */
 
 //INCLUDE SPRITE FILE LATER
-//#include "koopa.h"
+#include "marcowtile.h"
 
 /* include the tile map we are using */
 //CHANGE THESE LATER WHEN WE HAVE BETTER MAPS
@@ -67,11 +67,6 @@ volatile short* bg0_x_scroll = (unsigned short*) 0x4000010;
 volatile short* bg0_y_scroll = (unsigned short*) 0x4000012;
 volatile short* bg1_x_scroll = (unsigned short*) 0x4000014;
 volatile short* bg1_y_scroll = (unsigned short*) 0x4000016;
-
-
-
-
-
 
 
 
@@ -344,18 +339,16 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
 }
 
 /* setup the sprite image and palette */
-
-
-//void setup_sprite_image() {
+void setup_sprite_image() {
     /* load the palette from the image into palette memory*/
-//    memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) koopa_palette, PALETTE_SIZE);
+    memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) marcowtile_palette, PALETTE_SIZE);
 
     /* load the image into char block 0 */
-//    memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) koopa_data, (koopa_width * koopa_height) / 2);
-//}
+    memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) marcowtile_data, (marcowtile_width * marcowtile_height) / 2);
+}
 
-/* a struct for the koopa's logic and behavior */
-struct Koopa {
+/* a struct for marco's logic and behavior */
+struct Marco {
     /* the actual sprite attribute info */
     struct Sprite* sprite;
 
@@ -371,124 +364,126 @@ struct Koopa {
     /* the animation counter counts how many frames until we flip */
     int counter;
 
-    /* whether the koopa is moving right now or not */
+    /* whether marco is moving right now or not */
     int move;
 
-    /* the number of pixels away from the edge of the screen the koopa stays */
+    /* the number of pixels away from the edge of the screen marco stays */
     int border;
 };
 
-/* initialize the koopa */
-void koopa_init(struct Koopa* koopa) {
-    koopa->x = 100;
-    koopa->y = 113;
-    koopa->border = 40;
-    koopa->frame = 0;
-    koopa->move = 0;
-    koopa->counter = 0;
-    koopa->animation_delay = 8;
+/* initialize marco */
+void marco_init(struct Marco* marco) {
+    marco->x = 100;
+    marco->y = 88;
+    marco->border = 40;
+    marco->frame = 0;
+    marco->move = 0;
+    marco->counter = 0;
+    marco->animation_delay = 8;
     //change SPRITE SIZE HERE!!!
-    koopa->sprite = sprite_init(koopa->x, koopa->y, SIZE_16_32, 0, 0, koopa->frame, 0);
+    marco->sprite = sprite_init(marco->x, marco->y, SIZE_64_64, 0, 0, marco->frame, 0);
 }
 
-/* move the koopa left or right returns if it is at edge of the screen */
-int koopa_left(struct Koopa* koopa) {
+/* move marco left or right returns if it is at edge of the screen */
+int marco_left(struct Marco* marco) {
     /* face left */
-    sprite_set_horizontal_flip(koopa->sprite, 1);
-    koopa->move = 1;
+    sprite_set_horizontal_flip(marco->sprite, 1);
+    marco->move = 1;
 
     /* if we are at the left end, just scroll the screen */
-    if (koopa->x < koopa->border) {
+    if (marco->x < marco->border) {
         return 1;
     } else {
         /* else move left */
-        koopa->x--;
+        marco->x--;
         return 0;
     }
 }
-int koopa_right(struct Koopa* koopa) {
+int marco_right(struct Marco* marco) {
     /* face right */
-    sprite_set_horizontal_flip(koopa->sprite, 0);
-    koopa->move = 1;
+    sprite_set_horizontal_flip(marco->sprite, 0);
+    marco->move = 1;
 
     /* if we are at the right end, just scroll the screen */
-    if (koopa->x > (SCREEN_WIDTH - 16 - koopa->border)) {
+    if (marco->x > (SCREEN_WIDTH - 16 - marco->border)) {
         return 1;
     } else {
         /* else move right */
-        koopa->x++;
+        marco->x++;
         return 0;
     }
 }
 
-void koopa_stop(struct Koopa* koopa) {
-    koopa->move = 0;
-    koopa->frame = 0;
-    koopa->counter = 7;
-    sprite_set_offset(koopa->sprite, koopa->frame);
+void marco_stop(struct Marco* marco) {
+    marco->move = 0;
+    marco->frame = 0;
+    marco->counter = 7;
+    sprite_set_offset(marco->sprite, marco->frame);
 }
 
-/* update the koopa */
-void koopa_update(struct Koopa* koopa) {
-    if (koopa->move) {
-        koopa->counter++;
-        if (koopa->counter >= koopa->animation_delay) {
-            koopa->frame = koopa->frame + 16;
-            if (koopa->frame > 16) {
-                koopa->frame = 0;
+/* update marco */
+void marco_update(struct Marco* marco) {
+    if (marco->move) {
+        marco->counter++;
+        if (marco->counter >= marco->animation_delay) {
+            //FRAME ANIMATION HERE, add the number of frames for the next
+            // animation
+            marco->frame = marco->frame + 64;
+            if (marco->frame > 64) {
+                marco->frame = 0;
             }
-            sprite_set_offset(koopa->sprite, koopa->frame);
-            koopa->counter = 0;
+            sprite_set_offset(marco->sprite, marco->frame);
+            marco->counter = 0;
         }
     }
 
-    sprite_position(koopa->sprite, koopa->x, koopa->y);
+    sprite_position(marco->sprite, marco->x, marco->y);
 }
 
 /* the main function */
 int main( ) {
     /* we set the mode to mode 0 with bg0 on */
-    *display_control = MODE0 | BG0_ENABLE | BG1_ENABLE /*| SPRITE_ENABLE | SPRITE_MAP_1D*/;
+    *display_control = MODE0 | BG0_ENABLE | BG1_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;
 
     /* setup the background 0 */
     setup_background();
 
     /* setup the sprite image data */
-   // setup_sprite_image();
+    setup_sprite_image();
 
     /* clear all the sprites on screen now */
-   // sprite_clear();
+    sprite_clear();
 
-    /* create the koopa */
-/*    struct Koopa koopa;
-    koopa_init(&koopa);        */
+    /* create the marco */
+    struct Marco marco;
+    marco_init(&marco);        
 
     /* set initial scroll to 0 */
     int xscroll = 0;
 
     /* loop forever */
     while (1) {
-        /* update the koopa */
-        //koopa_update(&koopa);
+        /* update marco */
+        marco_update(&marco);
 
-        /* now the arrow keys move the koopa */
-/*        if (button_pressed(BUTTON_RIGHT)) {
-            if (koopa_right(&koopa)) {
+        /* now the arrow keys move marco */
+        if (button_pressed(BUTTON_RIGHT)) {
+            if (marco_right(&marco)) {
                 xscroll++;
             }
         } else if (button_pressed(BUTTON_LEFT)) {
-            if (koopa_left(&koopa)) {
+            if (marco_left(&marco)) {
                 xscroll--;
             }
         } else {
-            koopa_stop(&koopa);
+            marco_stop(&marco);
         }
-*/
+
         /* wait for vblank before scrolling and moving sprites */
         wait_vblank();
         *bg0_x_scroll = xscroll/2;
         *bg1_x_scroll = xscroll*2;
-        //sprite_update_all();
+        sprite_update_all();
 
         /* delay some */
         delay(300);
