@@ -428,8 +428,8 @@ void marco_update(struct Marco* marco) {
         if (marco->counter >= marco->animation_delay) {
             //FRAME ANIMATION HERE, add the number of frames for the next
             // animation
-            marco->frame = marco->frame + 64;
-            if (marco->frame > 64) {
+            marco->frame = marco->frame + 512;
+            if (marco->frame > 512) {
                 marco->frame = 0;
             }
             sprite_set_offset(marco->sprite, marco->frame);
