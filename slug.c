@@ -379,7 +379,7 @@ void marco_init(struct Marco* marco) {
     marco->frame = 0;
     marco->move = 0;
     marco->counter = 0;
-    marco->animation_delay = 8;
+    marco->animation_delay = 32;
     //change SPRITE SIZE HERE!!!
     marco->sprite = sprite_init(marco->x, marco->y, SIZE_64_64, 0, 0, marco->frame, 0);
 }
@@ -486,7 +486,7 @@ int main( ) {
         sprite_update_all();
 
         /* delay some */
-        delay(200);
+        delay(300);
     }
 }
 
