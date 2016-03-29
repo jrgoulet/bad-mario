@@ -405,7 +405,7 @@ int marco_right(struct Marco* marco) {
     marco->move = 1;
 
     /* if we are at the right end, just scroll the screen */
-    if (marco->x > (SCREEN_WIDTH - 16 - marco->border)) {
+    if (marco->x > (SCREEN_WIDTH - 64 - marco->border)) {
         return 1;
     } else {
         /* else move right */
@@ -428,7 +428,7 @@ void marco_update(struct Marco* marco) {
         if (marco->counter >= marco->animation_delay) {
             //FRAME ANIMATION HERE, add the number of frames for the next
             // animation
-            marco->frame = marco->frame + 512;
+            marco->frame = marco->frame + 128;
             if (marco->frame > 512) {
                 marco->frame = 0;
             }
@@ -486,7 +486,7 @@ int main( ) {
         sprite_update_all();
 
         /* delay some */
-        delay(300);
+        delay(200);
     }
 }
 
