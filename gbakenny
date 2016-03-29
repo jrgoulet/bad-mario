@@ -2,16 +2,38 @@
 
 KITHOME="/home/kenny/documents/spring2016/cpsc305/devkitadv"
 
-# ensure that an input file was passed
-if [ $# -ne 1 ] 
+# ensure that at least one input file was passed
+if [ $# -lt 1 ] 
 then
   echo "Usage: $(basename $0) input.c"
-    exit
+  exit
+fi
+
+# for each argument
+for f in $*
+do
+    # get base name and extension
+    base=$(basename "$f")
+    extension="${base##*.}"
+    base="${base%.*}"
+
+    # if it's a C file, compile it
+    if [ "$extension" = "c" ]
+    then
+        $KITHOME/bin/arm-agb-elf-gcc -c -O3 -std=c99 "$base.$extension"
     fi
 
-# strip the .c extension
-    base=$(basename $1 .c)
+    # if it's a S file, assemble it
+    if [ "$extension" = "s" ]
+    then
+        $KITHOME/bin/arm-agb-elf-gcc -c "$base.$extension"
+    fi
+done
 
-# compile and pack the file into a GBA game
-  $KITHOME/bin/arm-agb-elf-gcc -std=c99 -O3 -nostartfiles $KITHOME/arm-agb-elf/lib/crt0.o  -o $base.elf $base.c -lm
-  $KITHOME/bin/arm-agb-elf-objcopy -O binary $base.elf $base.gba 
+# now link all the .o files we have
+$KITHOME/bin/arm-agb-elf-gcc -O3 -nostartfiles $KITHOME/arm-agb-elf/lib/crt0.o -o program.elf *.o -lm
+$KITHOME/bin/arm-agb-elf-objcopy -O binary program.elf program.gba
+
+# get rid of temp files
+rm -f *.o *.elf
+

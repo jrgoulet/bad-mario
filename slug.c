@@ -388,7 +388,7 @@ void marco_init(struct Marco* marco) {
 int marco_left(struct Marco* marco) {
     /* face left */
     sprite_set_horizontal_flip(marco->sprite, 1);
-    marco->move = 1;
+    marco->move = 128;
 
     /* if we are at the left end, just scroll the screen */
     if (marco->x < marco->border) {
@@ -402,7 +402,7 @@ int marco_left(struct Marco* marco) {
 int marco_right(struct Marco* marco) {
     /* face right */
     sprite_set_horizontal_flip(marco->sprite, 0);
-    marco->move = 1;
+    marco->move = 128;
 
     /* if we are at the right end, just scroll the screen */
     if (marco->x > (SCREEN_WIDTH - 64 - marco->border)) {
@@ -414,6 +414,9 @@ int marco_right(struct Marco* marco) {
     }
 }
 
+//we can add the breathing animation here by adding those frames to the 
+//png file, remaking with png2gba and then starting the frame where the breathing
+//starts, and reset it back to that frame every time he stops.
 void marco_stop(struct Marco* marco) {
     marco->move = 0;
     marco->frame = 0;
@@ -426,11 +429,11 @@ void marco_update(struct Marco* marco) {
     if (marco->move) {
         marco->counter++;
         if (marco->counter >= marco->animation_delay) {
-            //FRAME ANIMATION HERE, add the number of frames for the next
-            // animation
+            //FRAME ANIMATION HERE, add double the number of frames for the next
+            // animation.  For 64, add 128. 
             marco->frame = marco->frame + 128;
             if (marco->frame > 576) {
-                marco->frame = 0;
+                marco->frame = 128;
             }
             sprite_set_offset(marco->sprite, marco->frame);
             marco->counter = 0;
@@ -448,7 +451,7 @@ int main( ) {
     /* setup the background 0 */
     setup_background();
 
-    /* setup the sprite image data */
+   /* setup the sprite image data */
     setup_sprite_image();
 
     /* clear all the sprites on screen now */
