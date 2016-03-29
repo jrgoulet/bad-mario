@@ -387,6 +387,7 @@ void koopa_init(struct Koopa* koopa) {
     koopa->move = 0;
     koopa->counter = 0;
     koopa->animation_delay = 8;
+    //change SPRITE SIZE HERE!!!
     koopa->sprite = sprite_init(koopa->x, koopa->y, SIZE_16_32, 0, 0, koopa->frame, 0);
 }
 
