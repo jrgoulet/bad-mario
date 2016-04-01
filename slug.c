@@ -17,6 +17,7 @@
 
 //INCLUDE SPRITE FILE LATER
 #include "marcowtile.h"
+#include "goomba_32x32.h"
 
 /* include the tile map we are using */
 //CHANGE THESE LATER WHEN WE HAVE BETTER MAPS
@@ -339,12 +340,15 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
 }
 
 /* setup the sprite image and palette */
+//FIGURE OUT HOW TO ADD SECOND SPRITE
 void setup_sprite_image() {
   /* load the palette from the image into palette memory*/
   memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) marcowtile_palette, PALETTE_SIZE);
+  //memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) goomba_32x32_palette, PALETTE_SIZE);
 
   /* load the image into char block 0 */
   memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) marcowtile_data, (marcowtile_width * marcowtile_height) / 2);
+  //memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) goomba_32x32_data, (goomba_32x32_width * goomba_32x32_height) / 2);
 }
 
 /* a struct for marco's logic and behavior */
@@ -353,7 +357,7 @@ struct Marco {
   struct Sprite* sprite;
 
   /* the x and y postion in 1/256 pixels */
-  int x, y;
+  int x, y, leftHit, rightHit, bottomHit, topHit;
 
   /* marco's y velocity in 1/256 pixels/second */
   int yvel; 
@@ -385,6 +389,10 @@ struct Marco {
 void marco_init(struct Marco* marco) {
   marco->x = 100;
   marco->y = 88;
+  marco->leftHit = marco->x + 21;
+  marco->rightHit = marco->x + 47;
+  marco->bottomHit = marco->y + 64;
+  marco->topHit = marco->y + 24;
   marco->yvel = 0;
   marco->gravity = 50;
   marco->border = 40;
@@ -404,12 +412,12 @@ int marco_left(struct Marco* marco) {
   marco->move = 128;
 
   /* if we are at the left end, just scroll the screen */
-  if ((marco->x >>8) < marco->border) {
+  if ((marco->x/* >>8*/) < marco->border) {
     return 1; 
   } else {
     /* else move left */
-    //marco->x--;
-    marco->x -= 256; //added for jumping and falling
+    marco->x--;
+    //marco->x -= 256; //added for jumping and falling
     return 0;
   }
 }
@@ -419,12 +427,12 @@ int marco_right(struct Marco* marco) {
   marco->move = 128;
 
   /* if we are at the right end, just scroll the screen */
-  if ((marco->x >> 8) > (SCREEN_WIDTH - 64 - marco->border)) {
+  if ((marco->x /*>> 8*/) > (SCREEN_WIDTH - 64 - marco->border)) {
     return 1; 
   } else {
     /* else move right */
-    //marco->x++;
-    marco->x += 256; //added for jumping and falling
+    marco->x++;
+    //marco->x += 256; //added for jumping and falling
     return 0;
   }
 }
@@ -439,23 +447,100 @@ void marco_stop(struct Marco* marco) {
 
 
 /* start the marco jumping, unless already fgalling */
-void marco_jump(struct Marco* marco) {
+/*
+  void marco_jump(struct Marco* marco) {
   if (!marco->falling) {
     marco->yvel = -1500;
     marco->falling = 1;
   }
+}            */
+
+
+/* a struct for marco's logic and behavior */
+struct Goomba {
+    /* the actual sprite attribute info */
+    struct Sprite* sprite;
+
+    /* the x and y postion in 1/256 pixels */
+    int x, y, leftHit, rightHit, bottomHit, topHit;
+
+    /* which frame of the animation he is on */
+    int frame;
+
+    /* the number of frames to wait before flipping */
+    int animation_delay;
+
+    /* the animation counter counts how many frames until we flip */
+    int counter;
+
+    /* whether goomba is moving right now or not */
+    int move;
+
+    /* the number of pixels away from the edge of the screen goomba stays */
+    int border;
+
+};
+
+
+/* initialize marco */
+void goomba_init(struct Goomba* goomba) {
+    goomba->x = 200;
+    goomba->y = 88;
+    goomba->leftHit = goomba->x + 5;
+    goomba->rightHit = goomba->x + 27;
+    goomba->bottomHit = goomba->y + 32;
+    goomba->topHit = goomba->y + 10;
+    goomba->border = 40;
+    goomba->frame = 0;
+    goomba->move = 0;
+    goomba->counter = 0;
+    goomba->animation_delay = 7;
+    //change SPRITE SIZE HERE!!!
+    goomba->sprite = sprite_init(goomba->x, goomba->y, SIZE_32_32, 0, 0, goomba->frame, 0);
 }
 
 
+/* move marco left or right returns if it is at edge of the screen */
+int goomba_left(struct Goomba* goomba) {
+    /* face left */
+    sprite_set_horizontal_flip(goomba->sprite, 1);
+    goomba->move = 0;
+    
+    if (goomba->x > 0) {
+      goomba->x -= 1;
+    }
+/*    
+    // if we are at the left end, just scroll the screen 
+    if (goomba->x < goomba->border) {
+      return 1;
+    } else {
+      // else move left 
+      //marco->x--;
+      marco->x -= 256; //added for jumping and falling
+      return 0;
+    }                                   */
+}
+
+
+
+
+
+
+
+
+#if 0
 /* finds which tile a screen coordinate maps to, taking scroll into account */
 unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
     const unsigned short* maptrans, int maptrans_w, int maptrans_h) {
 
   /* adjust for the scroll */
-  x += xscroll;
-  y += yscroll;
+  x += xscroll; //x left bound value
+  //xr += xscroll; //x right bound value
+  y += yscroll; //y top bound value
+  //yb += yscroll; //y bottom bound value
 
   /* convert from screen coordinates to tile coordinates */
+  
   x >>= 3;
   y >>= 3;
 
@@ -479,19 +564,20 @@ unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
   /* return the tile */
   return maptrans[index];
 }
-
+#endif
 
 /* update marco */
 void marco_update(struct Marco* marco, int xscroll) {
 
   /* update y position and speed if falling */
-  if (marco->falling) {
-    marco->y += marco->yvel;
-    marco->yvel += marco->gravity;
-  }
+//  if (marco->falling) {
+//    marco->y += marco->yvel;
+//    marco->yvel += marco->gravity;
+//  }
+
 
 //only for block commenting, very bad practice
-  
+#if 0  
   /* check which tile the marco's feet are over */
   unsigned short tile = tile_lookup((marco->x >> 8) + 8, (marco->y >> 8) + 32, xscroll,
       0, maptrans, maptrans_width, maptrans_height);
@@ -515,7 +601,7 @@ void marco_update(struct Marco* marco, int xscroll) {
     /* he is falling now */
     marco->falling = 1;
   }
-
+#endif
 
   /* update animation if moving */
   if (marco->move) {
@@ -535,8 +621,33 @@ void marco_update(struct Marco* marco, int xscroll) {
     }
   }
 
-  sprite_position(marco->sprite, marco->x >> 8, marco->y >> 8);
+  sprite_position(marco->sprite, marco->x /*>> 8*/, marco->y /*>> 8*/);
 }
+
+void goomba_update(struct Goomba* goomba) {
+
+    /* update animation if moving */
+    if (goomba->move) {
+      goomba->counter++;
+      if (goomba->counter >= goomba->animation_delay) {
+        //FRAME ANIMATION HERE, add double the number of frames for the next
+        // animation.  For 64, add 128. 
+        goomba->frame = goomba->frame + 64;
+        if (goomba->frame > 256) {
+          goomba->frame = 0;
+        }
+        sprite_set_offset(goomba->sprite, goomba->frame);
+        goomba->counter = 0;
+      }
+    }
+    
+    sprite_position(goomba->sprite, goomba->x /*>> 8*/, goomba->y /*>> 8*/);
+}
+
+
+
+
+
 
 /* the main function */
 int main( ) {
@@ -555,6 +666,9 @@ int main( ) {
   /* create the marco */
   struct Marco marco;
   marco_init(&marco);        
+  
+  struct Goomba goomba;
+  goomba_init(&goomba);
 
   /* set initial scroll to 0 */
   int xscroll = 0;
@@ -563,7 +677,7 @@ int main( ) {
   while (1) {
     /* update marco */
     marco_update(&marco, xscroll);
-
+    goomba_update(&goomba);
     /* now the arrow keys move marco */
     if (button_pressed(BUTTON_RIGHT)) {
       if (marco_right(&marco)) {
@@ -578,9 +692,9 @@ int main( ) {
     }
 
     /* check for jumping */
-    if (button_pressed(BUTTON_A)) {
-      marco_jump(&marco);
-    }
+//    if (button_pressed(BUTTON_A)) {
+//      marco_jump(&marco);
+//    }
 
     /* wait for vblank before scrolling and moving sprites */
     wait_vblank();
