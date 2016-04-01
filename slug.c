@@ -501,7 +501,7 @@ void goomba_init(struct Goomba* goomba) {
 
 
 /* move marco left or right returns if it is at edge of the screen */
-int goomba_left(struct Goomba* goomba) {
+void goomba_left(struct Goomba* goomba) {
     /* face left */
     sprite_set_horizontal_flip(goomba->sprite, 1);
     goomba->move = 0;
@@ -678,6 +678,7 @@ int main( ) {
     /* update marco */
     marco_update(&marco, xscroll);
     goomba_update(&goomba);
+    goomba_left(&goomba);
     /* now the arrow keys move marco */
     if (button_pressed(BUTTON_RIGHT)) {
       if (marco_right(&marco)) {
