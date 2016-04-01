@@ -356,10 +356,10 @@ struct Marco {
   int x, y;
 
   /* marco's y velocity in 1/256 pixels/second */
-  //int yvel; FROM FALLING
+  int yvel; 
 
   /* marco's y acceleration in 1/256 pixels/second^2 */
-  //int gravity; FROM FALLING
+  int gravity;
 
   /* which frame of the animation he is on */
   int frame;
@@ -377,7 +377,7 @@ struct Marco {
   int border;
 
   /* if marco is currently falling */
-  //int falling; FROM FALLING
+  int falling;
 
 };
 
@@ -385,13 +385,13 @@ struct Marco {
 void marco_init(struct Marco* marco) {
   marco->x = 100;
   marco->y = 88;
-  //marco->yvel = 0;
-  //marco->gravity = 50;
+  marco->yvel = 0;
+  marco->gravity = 50;
   marco->border = 40;
   marco->frame = 0;
   marco->move = 0;
   marco->counter = 0;
-  //marco->falling =0;
+  marco->falling =0;
   marco->animation_delay = 32;
   //change SPRITE SIZE HERE!!!
   marco->sprite = sprite_init(marco->x, marco->y, SIZE_64_64, 0, 0, marco->frame, 0);
@@ -404,12 +404,12 @@ int marco_left(struct Marco* marco) {
   marco->move = 128;
 
   /* if we are at the left end, just scroll the screen */
-  if ((marco->x/* >>8*/) < marco->border) {
-    return 1; //commented above shift bit, from falling additions
+  if ((marco->x >>8) < marco->border) {
+    return 1; 
   } else {
     /* else move left */
-    marco->x--;
-    //marco->x -= 256; added for jumping and falling
+    //marco->x--;
+    marco->x -= 256; //added for jumping and falling
     return 0;
   }
 }
@@ -419,12 +419,12 @@ int marco_right(struct Marco* marco) {
   marco->move = 128;
 
   /* if we are at the right end, just scroll the screen */
-  if ((marco->x /*>> 8*/) > (SCREEN_WIDTH - 64 - marco->border)) {
-    return 1; //commented above shift bit, from falling additions
+  if ((marco->x >> 8) > (SCREEN_WIDTH - 64 - marco->border)) {
+    return 1; 
   } else {
     /* else move right */
-    marco->x++;
-    //marco->x += 256; added for jumping and falling
+    //marco->x++;
+    marco->x += 256; //added for jumping and falling
     return 0;
   }
 }
@@ -437,7 +437,7 @@ void marco_stop(struct Marco* marco) {
       sprite_set_offset(marco->sprite, marco->frame);
 }
 
-#if 0
+
 /* start the marco jumping, unless already fgalling */
 void marco_jump(struct Marco* marco) {
   if (!marco->falling) {
@@ -479,33 +479,19 @@ unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
   /* return the tile */
   return maptrans[index];
 }
-#endif
 
-
-
-
-
-//we can add the breathing animation here by adding those frames to the 
-//png file, remaking with png2gba and then starting the frame where the breathing
-//starts, and reset it back to that frame every time he stops.
-/*void marco_stop(struct Marco* marco) {
-  marco->move = 0;
-  marco->frame = 0;
-  marco->counter = 7;
-  sprite_set_offset(marco->sprite, marco->frame);
-}*/
 
 /* update marco */
 void marco_update(struct Marco* marco, int xscroll) {
 
   /* update y position and speed if falling */
-//  if (marco->falling) {
-//    marco->y += marco->yvel;
-//    marco->yvel += marco->gravity;
-//  }
+  if (marco->falling) {
+    marco->y += marco->yvel;
+    marco->yvel += marco->gravity;
+  }
 
 //only for block commenting, very bad practice
-#if 0  
+  
   /* check which tile the marco's feet are over */
   unsigned short tile = tile_lookup((marco->x >> 8) + 8, (marco->y >> 8) + 32, xscroll,
       0, maptrans, maptrans_width, maptrans_height);
@@ -529,7 +515,7 @@ void marco_update(struct Marco* marco, int xscroll) {
     /* he is falling now */
     marco->falling = 1;
   }
-#endif
+
 
   /* update animation if moving */
   if (marco->move) {
@@ -549,7 +535,7 @@ void marco_update(struct Marco* marco, int xscroll) {
     }
   }
 
-  sprite_position(marco->sprite, marco->x/* >> 8*/, marco->y /*>> 8*/);
+  sprite_position(marco->sprite, marco->x >> 8, marco->y >> 8);
 }
 
 /* the main function */
@@ -592,9 +578,9 @@ int main( ) {
     }
 
     /* check for jumping */
-//    if (button_pressed(BUTTON_A)) {
-//      marco_jump(&marco);
-//    }
+    if (button_pressed(BUTTON_A)) {
+      marco_jump(&marco);
+    }
 
     /* wait for vblank before scrolling and moving sprites */
     wait_vblank();
