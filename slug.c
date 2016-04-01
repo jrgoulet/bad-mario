@@ -356,10 +356,10 @@ struct Marco {
   int x, y;
 
   /* marco's y velocity in 1/256 pixels/second */
-  int yvel;
+  //int yvel; FROM FALLING
 
   /* marco's y acceleration in 1/256 pixels/second^2 */
-  int gravity; 
+  //int gravity; FROM FALLING
 
   /* which frame of the animation he is on */
   int frame;
@@ -377,7 +377,7 @@ struct Marco {
   int border;
 
   /* if marco is currently falling */
-  int falling;
+  //int falling; FROM FALLING
 
 };
 
@@ -385,13 +385,13 @@ struct Marco {
 void marco_init(struct Marco* marco) {
   marco->x = 100;
   marco->y = 88;
-  marco->yvel = 0;
-  marco->gravity = 50;
+  //marco->yvel = 0;
+  //marco->gravity = 50;
   marco->border = 40;
   marco->frame = 0;
   marco->move = 0;
   marco->counter = 0;
-  marco->falling =0;
+  //marco->falling =0;
   marco->animation_delay = 32;
   //change SPRITE SIZE HERE!!!
   marco->sprite = sprite_init(marco->x, marco->y, SIZE_64_64, 0, 0, marco->frame, 0);
@@ -404,11 +404,12 @@ int marco_left(struct Marco* marco) {
   marco->move = 128;
 
   /* if we are at the left end, just scroll the screen */
-  if ((marco->x >>8) < marco->border) {
-    return 1;
+  if ((marco->x/* >>8*/) < marco->border) {
+    return 1; //commented above shift bit, from falling additions
   } else {
     /* else move left */
-    marco->x -= 256;
+    marco->x--;
+    //marco->x -= 256; added for jumping and falling
     return 0;
   }
 }
@@ -418,11 +419,12 @@ int marco_right(struct Marco* marco) {
   marco->move = 128;
 
   /* if we are at the right end, just scroll the screen */
-  if ((marco->x >> 8) > (SCREEN_WIDTH - 64 - marco->border)) {
-    return 1;
+  if ((marco->x /*>> 8*/) > (SCREEN_WIDTH - 64 - marco->border)) {
+    return 1; //commented above shift bit, from falling additions
   } else {
     /* else move right */
-    marco->x += 256;
+    marco->x++;
+    //marco->x += 256; added for jumping and falling
     return 0;
   }
 }
@@ -435,7 +437,7 @@ void marco_stop(struct Marco* marco) {
       sprite_set_offset(marco->sprite, marco->frame);
 }
 
-
+#if 0
 /* start the marco jumping, unless already fgalling */
 void marco_jump(struct Marco* marco) {
   if (!marco->falling) {
@@ -444,9 +446,10 @@ void marco_jump(struct Marco* marco) {
   }
 }
 
+
 /* finds which tile a screen coordinate maps to, taking scroll into account */
 unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
-    const unsigned short* tilemap, int tilemap_w, int tilemap_h) {
+    const unsigned short* maptrans, int maptrans_w, int maptrans_h) {
 
   /* adjust for the scroll */
   x += xscroll;
@@ -457,26 +460,26 @@ unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
   y >>= 3;
 
   /* account for wraparound */
-  while (x >= tilemap_w) {
-    x -= tilemap_w;
+  while (x >= maptrans_w) {
+    x -= maptrans_w;
   }
-  while (y >= tilemap_h) {
-    y -= tilemap_h;
+  while (y >= maptrans_h) {
+    y -= maptrans_h;
   }
   while (x < 0) {
-    x += tilemap_w;
+    x += maptrans_w;
   }
   while (y < 0) {
-    y += tilemap_h;
+    y += maptrans_h;
   }
 
   /* lookup this tile from the map */
-  int index = y * tilemap_w + x;
+  int index = y * maptrans_w + x;
 
   /* return the tile */
-  return tilemap[index];
+  return maptrans[index];
 }
-
+#endif
 
 
 
@@ -496,14 +499,16 @@ unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
 void marco_update(struct Marco* marco, int xscroll) {
 
   /* update y position and speed if falling */
-  if (marco->falling) {
-    marco->y += marco->yvel;
-    marco->yvel += marco->gravity;
-  }
+//  if (marco->falling) {
+//    marco->y += marco->yvel;
+//    marco->yvel += marco->gravity;
+//  }
 
+//only for block commenting, very bad practice
+#if 0  
   /* check which tile the marco's feet are over */
   unsigned short tile = tile_lookup((marco->x >> 8) + 8, (marco->y >> 8) + 32, xscroll,
-      0, map, map_width, map_height);
+      0, maptrans, maptrans_width, maptrans_height);
 
   /* if it's block tile
    * these numbers refer to the tile indices of the blocks the marco can walk on */
@@ -524,7 +529,7 @@ void marco_update(struct Marco* marco, int xscroll) {
     /* he is falling now */
     marco->falling = 1;
   }
-
+#endif
 
   /* update animation if moving */
   if (marco->move) {
@@ -587,9 +592,9 @@ int main( ) {
     }
 
     /* check for jumping */
-    if (button_pressed(BUTTON_A)) {
-      marco_jump(&marco);
-    }
+//    if (button_pressed(BUTTON_A)) {
+//      marco_jump(&marco);
+//    }
 
     /* wait for vblank before scrolling and moving sprites */
     wait_vblank();
