@@ -549,7 +549,7 @@ void marco_update(struct Marco* marco, int xscroll) {
     }
   }
 
-  sprite_position(marco->sprite, marco->x >> 8, marco->y >> 8);
+  sprite_position(marco->sprite, marco->x/* >> 8*/, marco->y /*>> 8*/);
 }
 
 /* the main function */
