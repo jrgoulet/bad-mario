@@ -541,7 +541,7 @@ void marco_update(struct Marco* marco, int xscroll) {
       // 128-896 walking animation
       // 896-3328 death animation 
       marco->frame = marco->frame + 128;
-      if (marco->frame > 896) {
+      if (marco->frame > 768) {
         marco->frame = 128;
       }
       sprite_set_offset(marco->sprite, marco->frame);
