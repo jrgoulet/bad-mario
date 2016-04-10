@@ -29,34 +29,34 @@ struct Goomba {
 
 
 /* initialize goomba */
-void goomba_init(struct Goomba* goomba) {
-    goomba->x = 200;
-    goomba->y = 120;
-    goomba->leftHit = goomba->x + 5;
-    goomba->rightHit = goomba->x + 27;
-    goomba->bottomHit = goomba->y + 32;
-    goomba->topHit = goomba->y + 10;
-    goomba->border = 30;
+//void goomba_init(struct Goomba* goomba) {
+  //  goomba->x = 200;
+  //  goomba->y = 120;
+  //  goomba->leftHit = goomba->x + 5;
+  //  goomba->rightHit = goomba->x + 27;
+  //  goomba->bottomHit = goomba->y + 32;
+  //  goomba->topHit = goomba->y + 10;
+  //  goomba->border = 30;
     //marco takes up 6 * 128 frames so goomba starts there
     //goomba takes up 5 * 64 frames so next sprite STARTS at 1088!!!!!!!!
-    goomba->frame = 768;
-    goomba->move = 768;
-    goomba->counter = 0;
-    goomba->animation_delay = 16;
+ //   goomba->frame = 768;
+//    goomba->move = 768;
+//    goomba->counter = 0;
+//    goomba->animation_delay = 16;
     //change SPRITE SIZE HERE!!!
-    goomba->sprite = sprite_init(goomba->x, goomba->y, SIZE_32_32, 0, 0, goomba->frame, 0);
-}//end goomba_init
+//    goomba->sprite = sprite_init(goomba->x, goomba->y, SIZE_32_32, 0, 0, goomba->frame, 0);
+//}//end goomba_init
 
 
 /* move goomba left returns if it is at edge of the screen */
-void goomba_left(struct Goomba* goomba) {
+//void goomba_left(struct Goomba* goomba) {
     /* face left */
-    sprite_set_horizontal_flip(goomba->sprite, 1);
-    goomba->move = 768;
+//    sprite_set_horizontal_flip(goomba->sprite, 1);
+//    goomba->move = 768;
 
-    if (goomba->x > goomba->border) {
-        goomba->x -= 1;
-    }
+  //  if (goomba->x > goomba->border) {
+  //      goomba->x -= 1;
+  //  }
     /*    
     // if we are at the left end, just scroll the screen 
     if (goomba->x < goomba->border) {
@@ -67,7 +67,7 @@ void goomba_left(struct Goomba* goomba) {
     marco->x -= 256; //added for jumping and falling
     return 0;
     }                                   */
-} //end goomba_left
+//} //end goomba_left
 
 //MIGHT NEED CODE BELOW LATER!!!!
 
@@ -112,25 +112,25 @@ unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
 
 
 // updates goomba's movement
-void goomba_update(struct Goomba* goomba) {
+//void goomba_update(struct Goomba* goomba) {
 
     /* update animation if moving */
-    if (goomba->move) {
-        goomba->counter++;
-        if (goomba->counter >= goomba->animation_delay) {
+  //  if (goomba->move) {
+   //     goomba->counter++;
+    //    if (goomba->counter >= goomba->animation_delay) {
             //FRAME ANIMATION HERE, add double the number of frames for the next
             // animation.  For 64, add 128. 
-            goomba->frame = goomba->frame + 32;
-            if (goomba->frame > 928) {
-                goomba->frame = 768;
-            }
-            sprite_set_offset(goomba->sprite, goomba->frame);
-            goomba->counter = 0;
-        }
-    }
+     //       goomba->frame = goomba->frame + 32;
+      //      if (goomba->frame > 928) {
+        //        goomba->frame = 768;
+       //     }
+         //   sprite_set_offset(goomba->sprite, goomba->frame);
+          //  goomba->counter = 0;
+       // }
+  //  }
 
-    sprite_position(goomba->sprite, goomba->x /*>> 8*/, goomba->y /*>> 8*/);
-}// end goomba_update
+    //sprite_position(goomba->sprite, goomba->x /*>> 8*/, goomba->y /*>> 8*/);
+//}// end goomba_update
 
 
 

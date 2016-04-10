@@ -7,11 +7,6 @@
  * side scrolling shooter
  */
 /* NEXT SPRITE STARTS AT 1088!!!!!!!!!!!!!!!   */
-//spyguy is 1088 to 1344
-//mario is 1344 to 2496
-
-
-
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 160
 
@@ -19,14 +14,19 @@
 #include "background.h"
 
 /* include the sprite image we are using */
+//#include "sprite.h"
+//#include "sprite_init.h"
 
 //INCLUDE SPRITE FILE LATER
 #include "sprites.h"
+#include "marco.h"
 #include "goomba.h"
 
-/* structs */
+/* Sprite forward declarations */
+//struct Sprite;
+//struct sprite_init;
+struct Marco;
 struct Goomba;
-
 
 /* include the tile map we are using */
 //CHANGE THESE LATER WHEN WE HAVE BETTER MAPS
@@ -194,9 +194,9 @@ void delay(unsigned int amount) {
 }
 
 /* a sprite is a moveable image on the screen */
-struct Sprite {
+ struct Sprite {
   unsigned short attribute0;
-  unsigned short attribute1;
+ unsigned short attribute1;
   unsigned short attribute2;
   unsigned short attribute3;
 };
@@ -221,9 +221,10 @@ enum SpriteSize {
   SIZE_32_64
 };
 
+
 /* function to initialize a sprite with its properties, and return a pointer */
 struct Sprite* sprite_init(int x, int y, enum SpriteSize size,
-    int horizontal_flip, int vertical_flip, int tile_index, int priority) {
+     int horizontal_flip, int vertical_flip, int tile_index, int priority) {
 
   /* grab the next index */
   int index = next_sprite_index++;
@@ -249,7 +250,7 @@ struct Sprite* sprite_init(int x, int y, enum SpriteSize size,
   int v = vertical_flip ? 1 : 0;
 
   /* set up the first attribute */
-  sprites[index].attribute0 = y |             /* y coordinate */
+ sprites[index].attribute0 = y |             /* y coordinate */
     (0 << 8) |          /* rendering mode */
     (0 << 10) |         /* gfx mode */
     (0 << 12) |         /* mosaic */
@@ -358,40 +359,6 @@ void setup_sprite_image() {
   memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) sprites_data, (sprites_width * sprites_height) / 2);
 }
 
-/* a struct for marco's logic and behavior */
-struct Marco {
-  /* the actual sprite attribute info */
-  struct Sprite* sprite;
-
-  /* the x and y postion in 1/256 pixels */
-  int x, y, leftHit, rightHit, bottomHit, topHit;
-
-  /* marco's y velocity in 1/256 pixels/second */
-  int yvel; 
-
-  /* marco's y acceleration in 1/256 pixels/second^2 */
-  int gravity;
-
-  /* which frame of the animation he is on */
-  int frame;
-
-  /* the number of frames to wait before flipping */
-  int animation_delay;
-
-  /* the animation counter counts how many frames until we flip */
-  int counter;
-
-  /* whether marco is moving right now or not */
-  int move;
-
-  /* the number of pixels away from the edge of the screen marco stays */
-  int border;
-
-  /* if marco is currently falling */
-  int falling;
-
-};
-
 /* initialize marco */
 void marco_init(struct Marco* marco) {
   marco->x = 100;
@@ -464,33 +431,33 @@ void marco_stop(struct Marco* marco) {
 
 
 /* a struct for marco's logic and behavior */
+
 //struct Goomba {
-    /* the actual sprite attribute info */
-   // struct Sprite* sprite;
+   ///* the actual sprite attribute info */
+  //  struct Sprite* sprite;
 
     /* the x and y postion in 1/256 pixels */
-   // int x, y, leftHit, rightHit, bottomHit, topHit;
+  //  int x, y, leftHit, rightHit, bottomHit, topHit;
 
     /* which frame of the animation he is on */
-   // int frame;
+    //int frame;
 
     /* the number of frames to wait before flipping */
-   // int animation_delay;
+    //int animation_delay;
 
     /* the animation counter counts how many frames until we flip */
-   // int counter;
+    //int counter;
 
     /* whether goomba is moving right now or not */
     //int move;
 
     /* the number of pixels away from the edge of the screen goomba stays */
-  //  int border;
+    //int border;
 
 //};
-
+//*/
 
 /* initialize marco */
-/*
 void goomba_init(struct Goomba* goomba) {
     goomba->x = 200;
     goomba->y = 120;
@@ -508,30 +475,27 @@ void goomba_init(struct Goomba* goomba) {
     //change SPRITE SIZE HERE!!!
     goomba->sprite = sprite_init(goomba->x, goomba->y, SIZE_32_32, 0, 0, goomba->frame, 0);
 }
-*/
 
 
-
-/*
-// move marco left or right returns if it is at edge of the screen 
+/* move marco left or right returns if it is at edge of the screen */
 void goomba_left(struct Goomba* goomba) {
-    // face left 
+    /* face left */
     sprite_set_horizontal_flip(goomba->sprite, 1);
     goomba->move = 768;
     
     if (goomba->x > goomba->border) {
       goomba->x -= 1;
-    }                                         */
-/*    
+    }
+   
     // if we are at the left end, just scroll the screen 
-    if (goomba->x < goomba->border) {
-      return 1;
-    } else {
+//    if (goomba->x < goomba->border) {
+  //    return 1;
+   // } else {
       // else move left 
       //marco->x--;
-      marco->x -= 256; //added for jumping and falling
-      return 0;
-    }                                   */
+      //marco->x -= 256; //added for jumping and falling
+      //return 0;
+    }                                   
 //}
 
 
@@ -637,10 +601,9 @@ void marco_update(struct Marco* marco, int xscroll) {
   sprite_position(marco->sprite, marco->x /*>> 8*/, marco->y /*>> 8*/);
 }
 
-/*
 void goomba_update(struct Goomba* goomba) {
 
-    // update animation if moving 
+    /* update animation if moving */
     if (goomba->move) {
       goomba->counter++;
       if (goomba->counter >= goomba->animation_delay) {
@@ -654,10 +617,10 @@ void goomba_update(struct Goomba* goomba) {
         goomba->counter = 0;
       }
     }
-    // took out >>8 after goomba x and goomba y
-    sprite_position(goomba->sprite, goomba->x , goomba->y );
+    
+    sprite_position(goomba->sprite, goomba->x /*>> 8*/, goomba->y /*>> 8*/);
 }
-*/
+
 
 
 
@@ -683,6 +646,7 @@ int main( ) {
   
   struct Goomba goomba;
   goomba_init(&goomba);
+
 
   /* set initial scroll to 0 */
   int xscroll = 0;
