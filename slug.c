@@ -344,11 +344,9 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
 void setup_sprite_image() {
   /* load the palette from the image into palette memory*/
   memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) sprites_palette, PALETTE_SIZE);
-  //memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) goomba_32x32_palette, PALETTE_SIZE);
 
   /* load the image into char block 0 */
   memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) sprites_data, (sprites_width * sprites_height) / 2);
-  //memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) goomba_32x32_data, (goomba_32x32_width * goomba_32x32_height) / 2);
 }
 
 /* a struct for marco's logic and behavior */
@@ -485,16 +483,18 @@ struct Goomba {
 /* initialize marco */
 void goomba_init(struct Goomba* goomba) {
     goomba->x = 200;
-    goomba->y = 88;
+    goomba->y = 120;
     goomba->leftHit = goomba->x + 5;
     goomba->rightHit = goomba->x + 27;
     goomba->bottomHit = goomba->y + 32;
     goomba->topHit = goomba->y + 10;
-    goomba->border = 40;
-    goomba->frame = 0;
-    goomba->move = 0;
+    goomba->border = 30;
+    //marco takes up 6 * 128 frames so goomba starts there
+    //goomba takes up 5 * 64 frames so next sprite STARTS at 1088!!!!!!!!
+    goomba->frame = 768;
+    goomba->move = 768;
     goomba->counter = 0;
-    goomba->animation_delay = 7;
+    goomba->animation_delay = 16;
     //change SPRITE SIZE HERE!!!
     goomba->sprite = sprite_init(goomba->x, goomba->y, SIZE_32_32, 0, 0, goomba->frame, 0);
 }
@@ -504,9 +504,9 @@ void goomba_init(struct Goomba* goomba) {
 void goomba_left(struct Goomba* goomba) {
     /* face left */
     sprite_set_horizontal_flip(goomba->sprite, 1);
-    goomba->move = 0;
+    goomba->move = 768;
     
-    if (goomba->x > 0) {
+    if (goomba->x > goomba->border) {
       goomba->x -= 1;
     }
 /*    
@@ -613,7 +613,7 @@ void marco_update(struct Marco* marco, int xscroll) {
       // 128-896 walking animation
       // 896-3328 death animation 
       marco->frame = marco->frame + 128;
-      if (marco->frame > 768) {
+      if (marco->frame > 640) {
         marco->frame = 128;
       }
       sprite_set_offset(marco->sprite, marco->frame);
@@ -632,9 +632,9 @@ void goomba_update(struct Goomba* goomba) {
       if (goomba->counter >= goomba->animation_delay) {
         //FRAME ANIMATION HERE, add double the number of frames for the next
         // animation.  For 64, add 128. 
-        goomba->frame = goomba->frame + 64;
-        if (goomba->frame > 256) {
-          goomba->frame = 0;
+        goomba->frame = goomba->frame + 32;
+        if (goomba->frame > 928) {
+          goomba->frame = 768;
         }
         sprite_set_offset(goomba->sprite, goomba->frame);
         goomba->counter = 0;
