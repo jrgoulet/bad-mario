@@ -16,8 +16,8 @@
 /* include the sprite image we are using */
 
 //INCLUDE SPRITE FILE LATER
-#include "marcowtile.h"
-#include "goomba_32x32.h"
+#include "sprites.h"
+
 
 /* include the tile map we are using */
 //CHANGE THESE LATER WHEN WE HAVE BETTER MAPS
@@ -343,11 +343,11 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
 //FIGURE OUT HOW TO ADD SECOND SPRITE
 void setup_sprite_image() {
   /* load the palette from the image into palette memory*/
-  memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) marcowtile_palette, PALETTE_SIZE);
+  memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) sprites_palette, PALETTE_SIZE);
   //memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) goomba_32x32_palette, PALETTE_SIZE);
 
   /* load the image into char block 0 */
-  memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) marcowtile_data, (marcowtile_width * marcowtile_height) / 2);
+  memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) sprites_data, (sprites_width * sprites_height) / 2);
   //memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) goomba_32x32_data, (goomba_32x32_width * goomba_32x32_height) / 2);
 }
 
