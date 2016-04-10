@@ -6,7 +6,7 @@
  * slug.c
  * side scrolling shooter
  */
-
+/* NEXT SPRITE STARTS AT 1088!!!!!!!!!!!!!!!   */
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 160
 
