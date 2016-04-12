@@ -10,13 +10,17 @@ CPSC 305 01 - Finlayson
 Spring 2016
 */
 
+
+
 /* ====== Header Files ================================================================================ */
 
 #include "background.h"
 #include "sprites.h"
-#include "marco.h"
-#include "goomba.h"
-
+//#include "marco.h"
+//#include "goomba.h"
+//#include "dma.h"
+#include "controls.h"
+#include "sprite.h"
 #include "map.h"
 #include "maptrans.h"
 
@@ -55,6 +59,7 @@ Spring 2016
 
 /* ====== Declarations ================================================================================ */
 
+struct Sprite* sprites[NUM_SPRITES];
 struct Marco;
 struct Goomba;
 
@@ -137,28 +142,28 @@ void setup_background() {
 
   /* load the image into char block 0 */
   memcpy16_dma((unsigned short*) char_block(0), (unsigned short*) background_data,
-      (background_width * background_height) / 2);
+	  (background_width * background_height) / 2);
 
   /* set all control the bits in this register */
   *bg0_control = 1 |    /* priority, 0 is highest, 3 is lowest */
-    (0 << 2)  |       /* the char block the image data is stored in */
-    (0 << 6)  |       /* the mosaic flag */
-    (1 << 7)  |       /* color mode, 0 is 16 colors, 1 is 256 colors */
-    (16 << 8) |       /* the screen block the tile data is stored in */
-    (1 << 13) |       /* wrapping flag */
-    (0 << 14);        /* bg size, 0 is 256x256 */
+	(0 << 2)  |       /* the char block the image data is stored in */
+	(0 << 6)  |       /* the mosaic flag */
+	(1 << 7)  |       /* color mode, 0 is 16 colors, 1 is 256 colors */
+	(16 << 8) |       /* the screen block the tile data is stored in */
+	(1 << 13) |       /* wrapping flag */
+	(0 << 14);        /* bg size, 0 is 256x256 */
 
   /* load the tile data into screen block 16 */
   memcpy16_dma((unsigned short*) screen_block(16), (unsigned short*) map, map_width * map_height);
 
   /* set all control the bits in this register */
   *bg1_control = 0 |    /* priority, 0 is highest, 3 is lowest */
-    (0 << 2)  |         /*the char block the image data is stored in */
-    (0 << 6)  |         /* the mosaic flag */
-    (1 << 7)  |         /* color mode, 0 is 16 colors, 1 is 256 colors */
-    (24 << 8) |         /* the screen block the tile data is stored in */
-    (1 << 13) |         /* wrapping flag */
-    (0 << 14);          /* bg size, 0 is 256 */
+	(0 << 2)  |         /*the char block the image data is stored in */
+	(0 << 6)  |         /* the mosaic flag */
+	(1 << 7)  |         /* color mode, 0 is 16 colors, 1 is 256 colors */
+	(24 << 8) |         /* the screen block the tile data is stored in */
+	(1 << 13) |         /* wrapping flag */
+	(0 << 14);          /* bg size, 0 is 256 */
 
   /* load the tile data into screen block 24 */
   memcpy16_dma((unsigned short*) screen_block(24), (unsigned short*) maptrans, maptrans_width * maptrans_height);
@@ -170,84 +175,14 @@ void delay(unsigned int amount) {
   for (int i = 0; i < amount * 10; i++);
 }
 
-/* a sprite is a moveable image on the screen */
- struct Sprite {
-  unsigned short attribute0;
- unsigned short attribute1;
-  unsigned short attribute2;
-  unsigned short attribute3;
-};
+/* setup all sprites */
+void sprite_clear() {
 
-/* array of all the sprites available on the GBA */
-struct Sprite sprites[NUM_SPRITES];
-int next_sprite_index = 0;
-
-/* the different sizes of sprites which are possible */
-enum SpriteSize {
-  SIZE_8_8,
-  SIZE_16_16,
-  SIZE_32_32,
-  SIZE_64_64,
-  SIZE_16_8,
-  SIZE_32_8,
-  SIZE_32_16,
-  SIZE_64_32,
-  SIZE_8_16,
-  SIZE_8_32,
-  SIZE_16_32,
-  SIZE_32_64
-};
-
-
-/* function to initialize a sprite with its properties, and return a pointer */
-struct Sprite* sprite_init(int x, int y, enum SpriteSize size,
-     int horizontal_flip, int vertical_flip, int tile_index, int priority) {
-
-  /* grab the next index */
-  int index = next_sprite_index++;
-
-  /* setup the bits used for each shape/size possible */
-  int size_bits, shape_bits;
-  switch (size) {
-    case SIZE_8_8:   size_bits = 0; shape_bits = 0; break;
-    case SIZE_16_16: size_bits = 1; shape_bits = 0; break;
-    case SIZE_32_32: size_bits = 2; shape_bits = 0; break;
-    case SIZE_64_64: size_bits = 3; shape_bits = 0; break;
-    case SIZE_16_8:  size_bits = 0; shape_bits = 1; break;
-    case SIZE_32_8:  size_bits = 1; shape_bits = 1; break;
-    case SIZE_32_16: size_bits = 2; shape_bits = 1; break;
-    case SIZE_64_32: size_bits = 3; shape_bits = 1; break;
-    case SIZE_8_16:  size_bits = 0; shape_bits = 2; break;
-    case SIZE_8_32:  size_bits = 1; shape_bits = 2; break;
-    case SIZE_16_32: size_bits = 2; shape_bits = 2; break;
-    case SIZE_32_64: size_bits = 3; shape_bits = 2; break;
+  /* move all sprites offscreen to hide them */
+  for(int i = 0; i < NUM_SPRITES; i++) {
+	sprites[i]->attribute0 = SCREEN_HEIGHT;
+	sprites[i]->attribute1 = SCREEN_WIDTH;
   }
-
-  int h = horizontal_flip ? 1 : 0;
-  int v = vertical_flip ? 1 : 0;
-
-  /* set up the first attribute */
- sprites[index].attribute0 = y |             /* y coordinate */
-    (0 << 8) |          /* rendering mode */
-    (0 << 10) |         /* gfx mode */
-    (0 << 12) |         /* mosaic */
-    (1 << 13) |         /* color mode, 0:16, 1:256 */
-    (shape_bits << 14); /* shape */
-
-  /* set up the second attribute */
-  sprites[index].attribute1 = x |             /* x coordinate */
-    (0 << 9) |          /* affine flag */
-    (h << 12) |         /* horizontal flip flag */
-    (v << 13) |         /* vertical flip flag */
-    (size_bits << 14);  /* size */
-
-  /* setup the second attribute */
-  sprites[index].attribute2 = tile_index |   // tile index */
-    (priority << 10) | // priority */
-    (0 << 12);         // palette bank (only 16 color)*/
-
-  /* return pointer to this sprite */
-  return &sprites[index];
 }
 
 /* update all of the sprites on the screen */
@@ -256,17 +191,6 @@ void sprite_update_all() {
   memcpy16_dma((unsigned short*) sprite_attribute_memory, (unsigned short*) sprites, NUM_SPRITES * 4);
 }
 
-/* setup all sprites */
-void sprite_clear() {
-  /* clear the index counter */
-  next_sprite_index = 0;
-
-  /* move all sprites offscreen to hide them */
-  for(int i = 0; i < NUM_SPRITES; i++) {
-    sprites[i].attribute0 = SCREEN_HEIGHT;
-    sprites[i].attribute1 = SCREEN_WIDTH;
-  }
-}
 
 /* this function checks whether a particular button has been pressed */
 unsigned char button_pressed(unsigned short button) {
@@ -275,69 +199,10 @@ unsigned char button_pressed(unsigned short button) {
 
   /* if this value is zero, then it's not pressed */
   if (pressed == 0) {
-    return 1;
+	return 1;
   } else {
-    return 0;
+	return 0;
   }
-}
-
-
-/* set a sprite postion */
-void sprite_position(struct Sprite* sprite, int x, int y) {
-  /* clear out the y coordinate */
-  sprite->attribute0 &= 0xff00;
-
-  /* set the new y coordinate */
-  sprite->attribute0 |= (y & 0xff);
-
-  /* clear out the x coordinate */
-  sprite->attribute1 &= 0xfe00;
-
-  /* set the new x coordinate */
-  sprite->attribute1 |= (x & 0x1ff);
-}
-
-/* move a sprite in a direction */
-void sprite_move(struct Sprite* sprite, int dx, int dy) {
-  /* get the current y coordinate */
-  int y = sprite->attribute0 & 0xff;
-
-  /* get the current x coordinate */
-  int x = sprite->attribute1 & 0x1ff;
-
-  /* move to the new location */
-  sprite_position(sprite, x + dx, y + dy);
-}
-
-/* change the vertical flip flag */
-void sprite_set_vertical_flip(struct Sprite* sprite, int vertical_flip) {
-  if (vertical_flip) {
-    /* set the bit */
-    sprite->attribute1 |= 0x2000;
-  } else {
-    /* clear the bit */
-    sprite->attribute1 &= 0xdfff;
-  }
-}
-
-/* change the vertical flip flag */
-void sprite_set_horizontal_flip(struct Sprite* sprite, int horizontal_flip) {
-  if (horizontal_flip) {
-    /* set the bit */
-    sprite->attribute1 |= 0x1000;
-  } else {
-    /* clear the bit */
-    sprite->attribute1 &= 0xefff;
-  }
-}
-
-/* change the tile offset of a sprite */
-void sprite_set_offset(struct Sprite* sprite, int offset) {
-  /* clear the old offset */
-  sprite->attribute2 &= 0xfc00;
-
-  /* apply the new one */
-  sprite->attribute2 |= (offset & 0x03ff);
 }
 
 /* setup the sprite image and palette */
@@ -348,224 +213,6 @@ void setup_sprite_image() {
 
   /* load the image into char block 0 */
   memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) sprites_data, (sprites_width * sprites_height) / 2);
-}
-
-/* ====== Misc Functions =============================================================================== */
-
-/* initialize marco */
-void marco_init(struct Marco* marco) {
-  marco->x = 100;
-  marco->y = 88;
-  marco->leftHit = marco->x + 21;
-  marco->rightHit = marco->x + 47;
-  marco->bottomHit = marco->y + 64;
-  marco->topHit = marco->y + 24;
-  marco->yvel = 0;
-  marco->gravity = 50;
-  marco->border = 40;
-  marco->frame = 0;
-  marco->move = 0;
-  marco->counter = 0;
-  marco->falling =0;
-  marco->animation_delay = 32;
-  //change SPRITE SIZE HERE!!!
-  marco->sprite = sprite_init(marco->x, marco->y, SIZE_64_64, 0, 0, marco->frame, 0);
-}
-
-/* move marco left or right returns if it is at edge of the screen */
-int marco_left(struct Marco* marco) {
-  /* face left */
-  sprite_set_horizontal_flip(marco->sprite, 1);
-  marco->move = 128;
-
-  /* if we are at the left end, just scroll the screen */
-  if ((marco->x/* >>8*/) < marco->border) {
-    return 1; 
-  } else {
-    /* else move left */
-    marco->x--;
-    //marco->x -= 256; //added for jumping and falling
-    return 0;
-  }
-}
-int marco_right(struct Marco* marco) {
-  /* face right */
-  sprite_set_horizontal_flip(marco->sprite, 0);
-  marco->move = 128;
-
-  /* if we are at the right end, just scroll the screen */
-  if ((marco->x /*>> 8*/) > (SCREEN_WIDTH - 64 - marco->border)) {
-    return 1; 
-  } else {
-    /* else move right */
-    marco->x++;
-    //marco->x += 256; //added for jumping and falling
-    return 0;
-  }
-}
-
-/* stop the marco from walking left/right */
-void marco_stop(struct Marco* marco) {
-      marco->move = 0;
-      marco->frame = 0;
-      marco->counter = 7;
-      sprite_set_offset(marco->sprite, marco->frame);
-}
-
-
-
-/* initialize marco */
-void goomba_init(struct Goomba* goomba) {
-    goomba->x = 200;
-    goomba->y = 120;
-    goomba->leftHit = goomba->x + 5;
-    goomba->rightHit = goomba->x + 27;
-    goomba->bottomHit = goomba->y + 32;
-    goomba->topHit = goomba->y + 10;
-    goomba->border = 30;
-    //marco takes up 6 * 128 frames so goomba starts there
-    //goomba takes up 5 * 64 frames so next sprite STARTS at 1088!!!!!!!!
-    goomba->frame = 768;
-    goomba->move = 768;
-    goomba->counter = 0;
-    goomba->animation_delay = 16;
-    //change SPRITE SIZE HERE!!!
-    goomba->sprite = sprite_init(goomba->x, goomba->y, SIZE_32_32, 0, 0, goomba->frame, 0);
-}
-
-
-/* move marco left or right returns if it is at edge of the screen */
-void goomba_left(struct Goomba* goomba) {
-    /* face left */
-    sprite_set_horizontal_flip(goomba->sprite, 1);
-    goomba->move = 768;
-    
-    if (goomba->x > goomba->border) {
-      goomba->x -= 1;
-    }
-}                                   
-
-
-
-
-
-
-
-
-#if 0
-/* finds which tile a screen coordinate maps to, taking scroll into account */
-unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
-    const unsigned short* maptrans, int maptrans_w, int maptrans_h) {
-
-  /* adjust for the scroll */
-  x += xscroll; //x left bound value
-  //xr += xscroll; //x right bound value
-  y += yscroll; //y top bound value
-  //yb += yscroll; //y bottom bound value
-
-  /* convert from screen coordinates to tile coordinates */
-  
-  x >>= 3;
-  y >>= 3;
-
-  /* account for wraparound */
-  while (x >= maptrans_w) {
-    x -= maptrans_w;
-  }
-  while (y >= maptrans_h) {
-    y -= maptrans_h;
-  }
-  while (x < 0) {
-    x += maptrans_w;
-  }
-  while (y < 0) {
-    y += maptrans_h;
-  }
-
-  /* lookup this tile from the map */
-  int index = y * maptrans_w + x;
-
-  /* return the tile */
-  return maptrans[index];
-}
-#endif
-
-/* update marco */
-void marco_update(struct Marco* marco, int xscroll) {
-
-  /* update y position and speed if falling */
-//  if (marco->falling) {
-//    marco->y += marco->yvel;
-//    marco->yvel += marco->gravity;
-//  }
-
-
-//only for block commenting, very bad practice
-#if 0  
-  /* check which tile the marco's feet are over */
-  unsigned short tile = tile_lookup((marco->x >> 8) + 8, (marco->y >> 8) + 32, xscroll,
-      0, maptrans, maptrans_width, maptrans_height);
-
-  /* if it's block tile
-   * these numbers refer to the tile indices of the blocks the marco can walk on */
-  if ((tile >= 1 && tile <= 6) || 
-      (tile >= 12 && tile <= 17)) {
-    /* stop the fall! */
-    marco->falling = 0;
-    marco->yvel = 0;
-
-    /* make him line up with the top of a block
-     * works by clearing out the lower bits to 0 */
-    marco->y &= ~0x7ff;
-
-    /* move him down one because there is a one pixel gap in the image */
-    marco->y++;
-
-  } else {
-    /* he is falling now */
-    marco->falling = 1;
-  }
-#endif
-
-  /* update animation if moving */
-  if (marco->move) {
-    marco->counter++;
-    if (marco->counter >= marco->animation_delay) {
-      //FRAME ANIMATION HERE, add double the number of frames for the next
-      // animation.  For 64, add 128.
-      // 0-128 standing animation
-      // 128-896 walking animation
-      // 896-3328 death animation 
-      marco->frame = marco->frame + 128;
-      if (marco->frame > 640) {
-        marco->frame = 128;
-      }
-      sprite_set_offset(marco->sprite, marco->frame);
-      marco->counter = 0;
-    }
-  }
-
-  sprite_position(marco->sprite, marco->x /*>> 8*/, marco->y /*>> 8*/);
-}
-
-void goomba_update(struct Goomba* goomba) {
-
-    /* update animation if moving */
-    if (goomba->move) {
-      goomba->counter++;
-      if (goomba->counter >= goomba->animation_delay) {
-        //FRAME ANIMATION HERE, add double the number of frames for the next
-        // animation.  For 64, add 128. 
-        goomba->frame = goomba->frame + 32;
-        if (goomba->frame > 928) {
-          goomba->frame = 768;
-        }
-        sprite_set_offset(goomba->sprite, goomba->frame);
-        goomba->counter = 0;
-      }
-    }
-    
-    sprite_position(goomba->sprite, goomba->x /*>> 8*/, goomba->y /*>> 8*/);
 }
 
 /* ====== Main ========================================================================================= */
@@ -581,55 +228,43 @@ int main( ) {
   setup_sprite_image();
 
   /* clear all the sprites on screen now */
-  sprite_clear();
+  //sprite_clear();
 
-  /* create the marco */
-  struct Marco marco;
-  marco_init(&marco);        
-  
-  struct Goomba goomba;
-  goomba_init(&goomba);
-
+  /* sprite initialization */
+  sprites[0] = new_Sprite("Marco", SIZE_64_64, 100, 88, 0, 0, 0, 0);
+  sprite_collision_init(sprites[0],21,47,64,24,40);
 
   /* set initial scroll to 0 */
   int xscroll = 0;
 
   /* loop forever */
   while (1) {
-    /* update marco */
-    marco_update(&marco, xscroll);
-    goomba_update(&goomba);
-    goomba_left(&goomba);
-    /* now the arrow keys move marco */
-    if (button_pressed(BUTTON_RIGHT)) {
-      if (marco_right(&marco)) {
-        xscroll++;
-      }
-    } else if (button_pressed(BUTTON_LEFT)) {
-      if (marco_left(&marco)) {
-        xscroll--;
-      }
-    } else {
-      marco_stop(&marco);
-    }
+	
+	/* User Controls */
+	if (button_pressed(BUTTON_RIGHT)) {
+	  if (move_right(sprites[0])) {
+		xscroll++;
+	  }
+	} else if (button_pressed(BUTTON_LEFT)) {
+	  if (move_left(sprites[0])) {
+		xscroll--;
+	  }
+	} else {
+	  move_none(sprites[0]);
+	}
 
-    /* check for jumping */
-//    if (button_pressed(BUTTON_A)) {
-//      marco_jump(&marco);
-//    }
+	/* wait for vblank before scrolling and moving sprites */
+	wait_vblank();
+	*bg0_x_scroll = xscroll/2;
+	*bg1_x_scroll = xscroll*2;
+	sprite_update_all();
 
-    /* wait for vblank before scrolling and moving sprites */
-    wait_vblank();
-    *bg0_x_scroll = xscroll/2;
-    *bg1_x_scroll = xscroll*2;
-    sprite_update_all();
+	/* delay some */
+	delay(200);
 
-    /* delay some */
-    delay(200);
+  }
 
-  }// end while
-
-}// end main
+}
 
 /* the game boy advance uses "interrupts" to handle certain situations
  * for now we will ignore these */
