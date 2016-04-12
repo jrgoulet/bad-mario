@@ -7,6 +7,12 @@
  * side scrolling shooter
  */
 /* NEXT SPRITE STARTS AT 1088!!!!!!!!!!!!!!!   */
+// spyguy is 1088 to 1344
+// mario is 1344 to 2496
+// GO symbol is 2496 to 3264
+// BLANK FRAMES, ADD SMALLER SPRITES HERE 3264 TO 3392
+// marco death anmation 3392 to 4800
+// explosion 4800 to 6464
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 160
 
@@ -458,34 +464,34 @@ void marco_stop(struct Marco* marco) {
 //*/
 
 /* initialize marco */
-void goomba_init(struct Goomba* goomba) {
-    goomba->x = 200;
-    goomba->y = 120;
-    goomba->leftHit = goomba->x + 5;
-    goomba->rightHit = goomba->x + 27;
-    goomba->bottomHit = goomba->y + 32;
-    goomba->topHit = goomba->y + 10;
-    goomba->border = 30;
+//void goomba_init(struct Goomba* goomba) {
+  //  goomba->x = 200;
+  //  goomba->y = 120;
+ //   goomba->leftHit = goomba->x + 5;
+  //  goomba->rightHit = goomba->x + 27;
+  //  goomba->bottomHit = goomba->y + 32;
+  //  goomba->topHit = goomba->y + 10;
+  //  goomba->border = 30;
     //marco takes up 6 * 128 frames so goomba starts there
     //goomba takes up 5 * 64 frames so next sprite STARTS at 1088!!!!!!!!
-    goomba->frame = 768;
-    goomba->move = 768;
-    goomba->counter = 0;
-    goomba->animation_delay = 16;
+  //  goomba->frame = 768;
+  //  goomba->move = 768;
+  //  goomba->counter = 0;
+ //   goomba->animation_delay = 16;
     //change SPRITE SIZE HERE!!!
-    goomba->sprite = sprite_init(goomba->x, goomba->y, SIZE_32_32, 0, 0, goomba->frame, 0);
-}
+  //  goomba->sprite = sprite_init(goomba->x, goomba->y, SIZE_32_32, 0, 0, goomba->frame, 0);
+//}
 
 
 /* move marco left or right returns if it is at edge of the screen */
-void goomba_left(struct Goomba* goomba) {
+//void goomba_left(struct Goomba* goomba) {
     /* face left */
-    sprite_set_horizontal_flip(goomba->sprite, 1);
-    goomba->move = 768;
+//    sprite_set_horizontal_flip(goomba->sprite, 1);
+//    goomba->move = 768;
     
-    if (goomba->x > goomba->border) {
-      goomba->x -= 1;
-    }
+//    if (goomba->x > goomba->border) {
+//      goomba->x -= 1;
+//    }
    
     // if we are at the left end, just scroll the screen 
 //    if (goomba->x < goomba->border) {
@@ -495,7 +501,7 @@ void goomba_left(struct Goomba* goomba) {
       //marco->x--;
       //marco->x -= 256; //added for jumping and falling
       //return 0;
-    }                                   
+//    }                                   
 //}
 
 
@@ -601,25 +607,25 @@ void marco_update(struct Marco* marco, int xscroll) {
   sprite_position(marco->sprite, marco->x /*>> 8*/, marco->y /*>> 8*/);
 }
 
-void goomba_update(struct Goomba* goomba) {
+//void goomba_update(struct Goomba* goomba) {
 
     /* update animation if moving */
-    if (goomba->move) {
-      goomba->counter++;
-      if (goomba->counter >= goomba->animation_delay) {
+//    if (goomba->move) {
+//      goomba->counter++;
+//      if (goomba->counter >= goomba->animation_delay) {
         //FRAME ANIMATION HERE, add double the number of frames for the next
         // animation.  For 64, add 128. 
-        goomba->frame = goomba->frame + 32;
-        if (goomba->frame > 928) {
-          goomba->frame = 768;
-        }
-        sprite_set_offset(goomba->sprite, goomba->frame);
-        goomba->counter = 0;
-      }
-    }
+//        goomba->frame = goomba->frame + 32;
+//        if (goomba->frame > 928) {
+//          goomba->frame = 768;
+//        }
+//        sprite_set_offset(goomba->sprite, goomba->frame);
+//        goomba->counter = 0;
+ //     }
+ //   }
     
-    sprite_position(goomba->sprite, goomba->x /*>> 8*/, goomba->y /*>> 8*/);
-}
+ //   sprite_position(goomba->sprite, goomba->x /*>> 8*/, goomba->y /*>> 8*/);
+//}
 
 
 
