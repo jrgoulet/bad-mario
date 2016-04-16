@@ -240,9 +240,9 @@ int main( ) {
   sprite_collision_init(sprites[0],21,47,64,24,40);
   sprite_animation_init(sprites[0],128,640,0,128,896,3328,0,0);
     //Goomba
-  sprites[1] = new_Sprite("Goomba", SIZE_32_32, 200, 120, 0, 0, 1088, 0);
+  sprites[1] = new_Sprite("Goomba", SIZE_32_32, 200, 120, 0, 0, 768, 0);
   sprite_collision_init(sprites[1], 5, 27, 10, 32, 30);
-  sprite_animation_init(sprites[1], 1088, 1344, 1088, 1088, 1088, 1088, 1088, 1088);
+  sprite_animation_init(sprites[1], 768, 928, 768, 768, 768, 768, 768, 768);
   /* set initial scroll to 0 */
   int xscroll = 0;
 
