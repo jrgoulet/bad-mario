@@ -240,7 +240,7 @@ void sprite_update(struct Sprite* sprite, int xscroll) {
       		sprite->counter = 0;
     	}
     }
-}
+} 
 
 
 #endif
