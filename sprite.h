@@ -171,7 +171,7 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
   /* apply the new one */
   sprite->attribute2 |= (offset & 0x03ff);
 }
-
+// need to pass in frame from sprite and + frames.  It will be different per sprite
 void sprite_update(struct Sprite* sprite, int xscroll) {
 	if (sprite->move) {
     	sprite->counter++;
