@@ -28,12 +28,13 @@ int move_left(struct Sprite* sprite) {
 	sprite->counter = 0;
 
 	/* if we are at the left end, just scroll the screen */
-	if ((sprite->x/* >>8*/) < sprite->border) {
+	if ((sprite->x/*>> 8*/) < sprite->border) {
 		return 1; 
 	} else {
 		/* else move left */
-		sprite->x--;
-		//sprite->x -= 256; //added for jumping and falling
+		//sprite->x--;
+		sprite->x--; //added for jumping and falling
+		sprite_position(sprite);
 		return 0;
 	}
 }
@@ -57,8 +58,10 @@ int move_right(struct Sprite* sprite) {
 		return 1; 
 	} else {
 		/* else move right */
-		sprite->x++;
-		//sprite->x += 256; //added for jumping and falling
+		//sprite->x++;
+
+		sprite->x++; //added for jumping and falling
+		sprite_position(sprite);
 		return 0;
 	}
 }

@@ -1,3 +1,6 @@
+#ifndef MAP_H_
+#define MAP_H_
+
 /* created by GBA Tile Editor */
 
 #define map_width 32
@@ -120,3 +123,4 @@ const unsigned short map [] = {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
 };
 
+#endif

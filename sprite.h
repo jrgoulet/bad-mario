@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "map.h"
 
 enum SpriteSize {
   SIZE_8_8,
@@ -107,6 +108,7 @@ struct Sprite_MEM sprite_mem_init (struct Sprite* sprite, int h, int v, enum Spr
 
 	return sprite_m;
 }
+
 struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h, int v, int tile_index, int priority) {
 
 	struct Sprite* sprite = malloc(sizeof(struct Sprite));
@@ -134,7 +136,7 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 	sprite->counter = 0;		/* set in sprite_set_flip_counter */
 	sprite->yvel = 0;			/* initially not falling */
 	sprite->falling = 0;		/* initially not falling */
-	sprite->animation_delay = 0;/* set in sprite_set_animation_delay */
+	sprite->animation_delay = 32;/* set in sprite_set_animation_delay */
 	sprite->move = 0;			/* initially not moving */
 
 	sprite->sprite_m = sprite_mem_init(sprite,h,v,size,tile_index,priority);
@@ -171,7 +173,11 @@ void sprite_animation_init(struct Sprite* sprite, int ws, int we, int as, int ae
 }
 
 /* set a sprite postion */
-void sprite_position(struct Sprite* sprite, int x, int y) {
+void sprite_position(struct Sprite* sprite) {
+ 
+  int x = sprite->x;
+  int y = sprite->y;
+
   /* clear out the y coordinate */
   sprite->sprite_m.attribute0 &= 0xff00;
 
@@ -183,6 +189,7 @@ void sprite_position(struct Sprite* sprite, int x, int y) {
 
   /* set the new x coordinate */
   sprite->sprite_m.attribute1 |= (x & 0x1ff);
+
 }
 
 /* move a sprite in a direction */
@@ -194,7 +201,7 @@ void sprite_move(struct Sprite* sprite, int dx, int dy) {
   int x = sprite->sprite_m.attribute1 & 0x1ff;
 
   /* move to the new location */
-  sprite_position(sprite, x + dx, y + dy);
+  sprite_position(sprite);
 }
 
 /* change the vertical flip flag */
@@ -227,20 +234,91 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
   /* apply the new one */
   sprite->sprite_m.attribute2 |= (offset & 0x03ff);
 }
-// need to pass in frame from sprite and + frames.  It will be different per sprite
-void sprite_update(struct Sprite* sprite, int xscroll) {
-	if (sprite->move) {
-    	sprite->counter++;
-    	if (sprite->counter >= sprite->animation_delay) {
-      		sprite->frame = sprite->frame + 128;
-      		if (sprite->frame > 640) {
-      			sprite->frame = 128;
-      		}
-      		sprite_set_offset(sprite, sprite->frame);
-      		sprite->counter = 0;
-    	}
+
+
+/* finds which tile a screen coordinate maps to, taking scroll into account */
+unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
+        const unsigned short* tilemap, int tilemap_w, int tilemap_h) {
+
+    /* adjust for the scroll */
+    x += xscroll;
+    y += yscroll;
+
+    /* convert from screen coordinates to tile coordinates */
+    x >>= 3;
+    y >>= 3;
+
+    /* account for wraparound */
+    while (x >= tilemap_w) {
+        x -= tilemap_w;
     }
-} 
+    while (y >= tilemap_h) {
+        y -= tilemap_h;
+    }
+    while (x < 0) {
+        x += tilemap_w;
+    }
+    while (y < 0) {
+        y += tilemap_h;
+    }
+
+    /* lookup this tile from the map */
+    int index = y * tilemap_w + x;
+
+    /* return the tile */
+    return tilemap[index];
+}
+
+void sprite_update(struct Sprite* sprite, int xscroll) {
+    /* update y position and speed if falling */
+    if (sprite->falling) {
+        sprite->y += sprite->yvel;
+        sprite->yvel += sprite->gravity;
+    }
+
+    /* check which tile the sprite's feet are over */
+    unsigned short tile = tile_lookup((sprite->x >> 8) + 8, (sprite->y >> 8) + 32, xscroll,
+            0, map, map_width, map_height);
+
+    /* if it's block tile
+     * these numbers refer to the tile indices of the blocks the sprite can walk on */
+    if ((tile >= 1 && tile <= 6) || 
+        (tile >= 12 && tile <= 17)) {
+        /* stop the fall! */
+        sprite->falling = 0;
+        sprite->yvel = 0;
+
+        /* make him line up with the top of a block
+         * works by clearing out the lower bits to 0 */
+        sprite->y &= ~0x7ff;
+
+        /* move him down one because there is a one pixel gap in the image */
+        sprite->y++;
+
+    } else {
+        /* he is falling now */
+        sprite->falling = 1;
+    }
+
+
+    /* update animation if moving */
+    if (sprite->move) {
+        sprite->counter++;
+        if (sprite->counter >= sprite->animation_delay) {
+            sprite->frame = sprite->frame + 16;
+            if (sprite->frame > 16) {
+                sprite->frame = 0;
+            }
+            sprite_set_offset(sprite, sprite->frame);
+            sprite->counter = 0;
+        }
+    }
+
+
+    /* set on screen position */
+    sprite_position(sprite);
+}
+
 
 
 #endif
