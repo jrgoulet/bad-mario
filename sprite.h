@@ -235,6 +235,7 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
   sprite->sprite_m.attribute2 |= (offset & 0x03ff);
 }
 
+
 /* finds which tile a screen coordinate maps to, taking scroll into account */
 unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
         const unsigned short* tilemap, int tilemap_w, int tilemap_h) {
@@ -313,9 +314,11 @@ void sprite_update(struct Sprite* sprite, int xscroll) {
         }
     }
 
+
     /* set on screen position */
     sprite_position(sprite);
 }
+
 
 
 #endif

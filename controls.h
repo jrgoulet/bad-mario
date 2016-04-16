@@ -6,6 +6,8 @@
 
 #include "sprite.h"
 
+//need to pass in sprite move, frame, and counter for each function because it will be different per sprite
+
 /* move sprite left or right returns if it is at edge of the screen */
 int move_left(struct Sprite* sprite) {
 	
