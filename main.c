@@ -16,9 +16,6 @@ Spring 2016
 
 #include "background.h"
 #include "sprites.h"
-//#include "marco.h"
-//#include "goomba.h"
-//#include "dma.h"
 #include "controls.h"
 #include "sprite.h"
 #include "map.h"
@@ -59,9 +56,9 @@ Spring 2016
 
 /* ====== Declarations ================================================================================ */
 
+struct Sprite* Marco;
+struct Sprite_MEM sprites_m[NUM_SPRITES];
 struct Sprite* sprites[NUM_SPRITES];
-struct Marco;
-struct Goomba;
 
 /* ====== Control Registers =========================================================================== */
 
@@ -180,15 +177,15 @@ void sprite_clear() {
 
   /* move all sprites offscreen to hide them */
   for(int i = 0; i < NUM_SPRITES; i++) {
-	sprites[i]->attribute0 = SCREEN_HEIGHT;
-	sprites[i]->attribute1 = SCREEN_WIDTH;
+	sprites[i]->sprite_m.attribute0 = SCREEN_HEIGHT;
+	sprites[i]->sprite_m.attribute1 = SCREEN_WIDTH;
   }
 }
 
 /* update all of the sprites on the screen */
 void sprite_update_all() {
   /* copy them all over */
-  memcpy16_dma((unsigned short*) sprite_attribute_memory, (unsigned short*) sprites, NUM_SPRITES * 4);
+  memcpy16_dma((unsigned short*) sprite_attribute_memory, (unsigned short*) sprites_m, NUM_SPRITES * 4);
 }
 
 
@@ -228,17 +225,23 @@ int main( ) {
   setup_sprite_image();
 
   /* clear all the sprites on screen now */
-  //sprite_clear();
+  //`sprite_clear();
 
   /* sprite initialization */
   sprites[0] = new_Sprite("Marco", SIZE_64_64, 100, 88, 0, 0, 0, 0);
+  //sprites_m[0] = sprites[0]->sprite_m;
   sprite_collision_init(sprites[0],21,47,64,24,40);
+  sprite_animation_init(sprites[0],128,640,0,128,896,3328,0,0);
 
   /* set initial scroll to 0 */
   int xscroll = 0;
 
   /* loop forever */
   while (1) {
+
+  	for (int i = 0; i < NUM_SPRITES; i++) {
+  		sprites_m[i] = sprites[i]->sprite_m;
+  	}
 	
 	/* User Controls */
 	if (button_pressed(BUTTON_RIGHT)) {
@@ -260,7 +263,7 @@ int main( ) {
 	sprite_update_all();
 
 	/* delay some */
-	delay(200);
+	delay(400);
 
   }
 

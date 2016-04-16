@@ -19,7 +19,7 @@ enum SpriteSize {
   SIZE_32_64
 };
 
-struct Sprite {
+struct Sprite_MEM {
 
 	/* Hardware Attributes */
 	unsigned short attribute0;
@@ -27,7 +27,14 @@ struct Sprite {
 	unsigned short attribute2;
 	unsigned short attribute3;
 
-	
+};
+
+
+struct Sprite {
+
+	/* Hardware Attributes */
+	struct Sprite_MEM sprite_m;
+
 	int x, y, leftHit, rightHit, bottomHit, topHit; /* x and y position in 1/256 px */
 	int yvel;				/* y-velocity in 1/256 px/sec */
 	int gravity; 			/* y-acceleration in 1/256px/sec^2 */
@@ -39,13 +46,26 @@ struct Sprite {
 	int falling; 			/* boolean, whether falling or not */
 	char* name; 			/* callsign */
 
+	/* Animation Frames */
+	int frame_interval;
+	int walk_start;
+	int walk_end;
+	int atk_start;
+	int atk_end;
+	int death_start;
+	int death_end;
+	int stand_start;
+	int stand_end;
 };
 
-struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h, int v, int tile_index, int priority) {
 
-	struct Sprite* sprite = malloc(sizeof(struct Sprite));
 
-  	int size_bits, shape_bits;
+
+struct Sprite_MEM sprite_mem_init (struct Sprite* sprite, int h, int v, enum SpriteSize size, int tile_index, int priority) {
+
+	struct Sprite_MEM sprite_m;
+
+	int size_bits, shape_bits;
   	switch (size) {
 		case SIZE_8_8:   size_bits = 0; shape_bits = 0; break;
 		case SIZE_16_16: size_bits = 1; shape_bits = 0; break;
@@ -61,9 +81,12 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 		case SIZE_32_64: size_bits = 3; shape_bits = 2; break;
 	}
 
+	int x = sprite->x;
+	int y = sprite->y;
+
 
 	/* attribute0 setup */
-	sprite->attribute0 = y |	/* y-coord */
+	sprite_m.attribute0 = y |	/* y-coord */
 		(0 <<  8) |				/* rendering mode */
 		(0 << 10) |				/* gfx mode */
 		(0 << 12) |				/* mosaic */
@@ -71,16 +94,37 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 		(shape_bits << 14);		/* shape */
 
 	/* attribute1 setup */
-	sprite->attribute1 = x | 	/* x-coord */
+	sprite_m.attribute1 = x | 	/* x-coord */
 		(0 <<  9) |				/* affine flag */
 		(h << 12) |				/* horizontal flip flag */
 		(v << 13) |				/* vertical flip flag */
 		(size_bits << 14);		/* size */
 
 	/* attribute2 setup */
-	sprite->attribute2 = tile_index | /* tile index */
+	sprite_m.attribute2 = tile_index | /* tile index */
 		(priority << 10) |		/* priority */
 		(0 << 12);				/* palette bank (16 color only) */
+
+	return sprite_m;
+}
+struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h, int v, int tile_index, int priority) {
+
+	struct Sprite* sprite = malloc(sizeof(struct Sprite));
+
+	switch (size) {
+		case SIZE_8_8:   sprite->frame_interval = 16; break;
+		case SIZE_16_16: sprite->frame_interval = 32; break;
+		case SIZE_32_32: sprite->frame_interval = 64; break;
+		case SIZE_64_64: sprite->frame_interval = 128; break;
+		case SIZE_16_8:  sprite->frame_interval = 24; break;
+		case SIZE_32_8:  sprite->frame_interval = 40; break;
+		case SIZE_32_16: sprite->frame_interval = 48; break;
+		case SIZE_64_32: sprite->frame_interval = 96; break;
+		case SIZE_8_16:  sprite->frame_interval = 24; break;
+		case SIZE_8_32:  sprite->frame_interval = 40; break;
+		case SIZE_16_32: sprite->frame_interval = 48; break;
+		case SIZE_32_64: sprite->frame_interval = 96; break;
+	}
 
 	/* initialization */
 	sprite->name = name;		/* name */
@@ -93,10 +137,11 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 	sprite->animation_delay = 0;/* set in sprite_set_animation_delay */
 	sprite->move = 0;			/* initially not moving */
 
+	sprite->sprite_m = sprite_mem_init(sprite,h,v,size,tile_index,priority);
+
 	/* return a pointer */
 	return sprite;
 }
-
 
 void sprite_set_animation_delay(struct Sprite* sprite, int delay) {
 	sprite->animation_delay = delay;
@@ -114,28 +159,39 @@ void sprite_collision_init(struct Sprite* sprite, int l, int r, int u, int d, in
 	sprite->border = b;
 }
 
+void sprite_animation_init(struct Sprite* sprite, int ws, int we, int as, int ae, int ds, int de, int ss, int se) {
+	sprite->walk_start = ws;
+	sprite->walk_end = we;
+	sprite->atk_start = as;
+	sprite->atk_end = ae;
+	sprite->death_start = ds;
+	sprite->death_end = de;
+	sprite->stand_start = ss;
+	sprite->stand_end = se;
+}
+
 /* set a sprite postion */
 void sprite_position(struct Sprite* sprite, int x, int y) {
   /* clear out the y coordinate */
-  sprite->attribute0 &= 0xff00;
+  sprite->sprite_m.attribute0 &= 0xff00;
 
   /* set the new y coordinate */
-  sprite->attribute0 |= (y & 0xff);
+  sprite->sprite_m.attribute0 |= (y & 0xff);
 
   /* clear out the x coordinate */
-  sprite->attribute1 &= 0xfe00;
+  sprite->sprite_m.attribute1 &= 0xfe00;
 
   /* set the new x coordinate */
-  sprite->attribute1 |= (x & 0x1ff);
+  sprite->sprite_m.attribute1 |= (x & 0x1ff);
 }
 
 /* move a sprite in a direction */
 void sprite_move(struct Sprite* sprite, int dx, int dy) {
   /* get the current y coordinate */
-  int y = sprite->attribute0 & 0xff;
+  int y = sprite->sprite_m.attribute0 & 0xff;
 
   /* get the current x coordinate */
-  int x = sprite->attribute1 & 0x1ff;
+  int x = sprite->sprite_m.attribute1 & 0x1ff;
 
   /* move to the new location */
   sprite_position(sprite, x + dx, y + dy);
@@ -145,10 +201,10 @@ void sprite_move(struct Sprite* sprite, int dx, int dy) {
 void sprite_set_vertical_flip(struct Sprite* sprite, int vertical_flip) {
   if (vertical_flip) {
     /* set the bit */
-    sprite->attribute1 |= 0x2000;
+    sprite->sprite_m.attribute1 |= 0x2000;
   } else {
     /* clear the bit */
-    sprite->attribute1 &= 0xdfff;
+    sprite->sprite_m.attribute1 &= 0xdfff;
   }
 }
 
@@ -156,20 +212,20 @@ void sprite_set_vertical_flip(struct Sprite* sprite, int vertical_flip) {
 void sprite_set_horizontal_flip(struct Sprite* sprite, int horizontal_flip) {
   if (horizontal_flip) {
     /* set the bit */
-    sprite->attribute1 |= 0x1000;
+    sprite->sprite_m.attribute1 |= 0x1000;
   } else {
     /* clear the bit */
-    sprite->attribute1 &= 0xefff;
+    sprite->sprite_m.attribute1 &= 0xefff;
   }
 }
 
 /* change the tile offset of a sprite */
 void sprite_set_offset(struct Sprite* sprite, int offset) {
   /* clear the old offset */
-  sprite->attribute2 &= 0xfc00;
+  sprite->sprite_m.attribute2 &= 0xfc00;
 
   /* apply the new one */
-  sprite->attribute2 |= (offset & 0x03ff);
+  sprite->sprite_m.attribute2 |= (offset & 0x03ff);
 }
 
 void sprite_update(struct Sprite* sprite, int xscroll) {

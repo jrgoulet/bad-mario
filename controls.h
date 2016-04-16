@@ -15,6 +15,16 @@ int move_left(struct Sprite* sprite) {
 	/* set movement speed */
 	sprite->move = 128;
 
+	/* walking animation */
+	if (sprite->frame >= sprite->walk_start && sprite->frame < sprite->walk_end) {
+		sprite->frame = sprite->frame + sprite->frame_interval;
+	} else {
+		sprite->frame = sprite->walk_start;
+	}
+
+	sprite_set_offset(sprite, sprite->frame);
+	sprite->counter = 0;
+
 	/* if we are at the left end, just scroll the screen */
 	if ((sprite->x/* >>8*/) < sprite->border) {
 		return 1; 
@@ -30,6 +40,16 @@ int move_right(struct Sprite* sprite) {
 	sprite_set_horizontal_flip(sprite, 0);
 	sprite->move = 128;
 
+	/* walking animation */
+	if (sprite->frame >= sprite->walk_start && sprite->frame < sprite->walk_end) {
+		sprite->frame = sprite->frame + sprite->frame_interval;
+	} else {
+		sprite->frame = sprite->walk_start;
+	}
+
+	sprite_set_offset(sprite, sprite->frame);
+	sprite->counter = 0;
+
 	/* if we are at the right end, just scroll the screen */
 	if ((sprite->x /*>> 8*/) > (SCREEN_WIDTH - 64 - sprite->border)) {
 		return 1; 
@@ -43,10 +63,11 @@ int move_right(struct Sprite* sprite) {
 
 /* stop the sprite from walking left/right */
 void move_none(struct Sprite* sprite) {
-			sprite->move = 0;
-			sprite->frame = 0;
-			sprite->counter = 7;
-			sprite_set_offset(sprite, sprite->frame);
+	sprite->move = 0;
+	sprite->counter = 7;
+	sprite->frame = 0;
+
+	sprite_set_offset(sprite, sprite->frame);
 }
 
 
