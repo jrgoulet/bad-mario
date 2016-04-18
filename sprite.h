@@ -108,6 +108,8 @@ struct Sprite_MEM sprite_mem_init (struct Sprite* sprite, int h, int v, enum Spr
 
 	return sprite_m;
 }
+// h = horizontal flip
+// v = vertical flip
 
 struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h, int v, int tile_index, int priority) {
 
