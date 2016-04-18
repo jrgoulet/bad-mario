@@ -232,9 +232,15 @@ int main( ) {
 
   /* sprite initialization */
   sprites[0] = new_Sprite("Marco", SIZE_64_64, 100, 88, 0, 0, 0, 0);
+  sprites[1] = new_Sprite("Mario", SIZE_32_64, 200, 88, 1, 0, 128,0);
+  sprites[2] = new_Sprite("Bullet", SIZE_8_8, 130, 100, 0, 0, 192, 0);
+  
   sprite_collision_init(sprites[0],21,47,64,24,40);
-//  sprite_animation_init(sprites[0],128,640,0,128,896,3328,0,0);
-  sprite_animation_init(sprites[0], 128, 640,0,0, 0, 0, 0,0);
+  // marco, mario, bullet animation cycles
+  // -- need later!!!!!!     sprite_animation_init(sprites[0],128,640,0,128,896,3328,0,0);
+  sprite_animation_init(sprites[0], 0, 127, 0, 0, 0, 0, 0, 0);
+  sprite_animation_init(sprites[1], 128, 191, 128, 128, 128, 128, 128, 128); 
+  sprite_animation_init(sprites[2], 192, 220,0,0, 0, 0, 0,0);
 // WTF! WHY WONT IT CYCLE THROUGH THE APPROPRIATE SLIDES????!!!!!
 //Goomba
 /*  sprites[1] = new_Sprite("Goomba", SIZE_32_32, 200, 120, 0, 0,968 , 0);
@@ -242,7 +248,7 @@ int main( ) {
   sprite_animation_init(sprites[1], 968, 1344, 968, 968, 968, 968, 968, 968);     */
   /* set initial scroll to 0 */
   int xscroll = 0;
-
+  int bulletTravel = 80;
   /* loop forever */
   while (1) {
     
@@ -253,15 +259,15 @@ int main( ) {
     //update_sprite(sprites[0], xscroll);
 	/* User Controls */
 	if (button_pressed(BUTTON_RIGHT)) {
-	  if (move_right(sprites[0])) {
+	  if (move_right(sprites[1])) {
 		xscroll++;
 	  }
 	} else if (button_pressed(BUTTON_LEFT)) {
-	  if (move_left(sprites[0])) {
+	  if (move_left(sprites[1])) {
 		xscroll--;
 	  }
 	} else {
-	  move_none(sprites[0]);
+	  move_none(sprites[1]);
 	}
 
 	/* wait for vblank before scrolling and moving sprites */

@@ -116,7 +116,7 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 	struct Sprite* sprite = malloc(sizeof(struct Sprite));
 
 	switch (size) {
-		case SIZE_8_8:   sprite->frame_interval = 16; break;
+		case SIZE_8_8:   sprite->frame_interval = 8; break;
 		case SIZE_16_16: sprite->frame_interval = 32; break;
 		case SIZE_32_32: sprite->frame_interval = 64; break;
 		case SIZE_64_64: sprite->frame_interval = 128; break;
@@ -140,6 +140,7 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 	sprite->falling = 0;		/* initially not falling */
 	sprite->animation_delay = 32;/* set in sprite_set_animation_delay */
 	sprite->move = 0;			/* initially not moving */
+    sprite->facing = h;         /* for knowing which way sprite is facing */
 
 	sprite->sprite_m = sprite_mem_init(sprite,h,v,size,tile_index,priority);
 
@@ -222,9 +223,11 @@ void sprite_set_horizontal_flip(struct Sprite* sprite, int horizontal_flip) {
   if (horizontal_flip) {
     /* set the bit */
     sprite->sprite_m.attribute1 |= 0x1000;
+    sprite->facing = 1;
   } else {
     /* clear the bit */
     sprite->sprite_m.attribute1 &= 0xefff;
+    sprite->facing = 0;
   }
 }
 

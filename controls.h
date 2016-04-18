@@ -16,7 +16,7 @@ int move_left(struct Sprite* sprite) {
 	
 	/* set movement speed */
     //this is for animation, not speed.  Marco starts his walking at frame 128
-	sprite->move = 128;//sprite->walk_start;
+	sprite->move = sprite->walk_start;
 
 	/* walking animation */
 	if (sprite->frame >= sprite->walk_start && sprite->frame < sprite->walk_end) {
@@ -42,7 +42,7 @@ int move_left(struct Sprite* sprite) {
 int move_right(struct Sprite* sprite) {
 	/* face right */
 	sprite_set_horizontal_flip(sprite, 0);
-	sprite->move = 128;//sprite->walk_start;
+	sprite->move = sprite->walk_start;
 
 	/* walking animation */
 	if (sprite->frame >= sprite->walk_start && sprite->frame < sprite->walk_end) {
@@ -69,12 +69,31 @@ int move_right(struct Sprite* sprite) {
 
 /* stop the sprite from walking left/right */
 void move_none(struct Sprite* sprite) {
-	sprite->move = 0;//sprite->stand_start;
-	sprite->counter = 7;
-	sprite->frame = 0;//sprite->stand_start;
+	sprite->move = sprite->walk_start;
+	sprite->counter = 0;
+	sprite->frame = sprite->walk_start;
 
 	sprite_set_offset(sprite, sprite->frame);
 }
+
+
+/* sprite shoot */
+//first is sprite shooting, second is bullet sprite
+void shoot (struct Sprite* sprite, struct Sprite* bullet, int dist) {
+    //bullet only goes for 80 pixels
+    int travel = 80;
+
+    // find which way sprite is facing
+    if (sprite->facing) {
+        // facing left
+        // shoot bullet to left
+    } else {
+        //facing right
+        //shoot bullet to right
+    }
+ 
+}
+
 
 
 #endif
