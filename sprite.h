@@ -175,7 +175,7 @@ void sprite_animation_init(struct Sprite* sprite, int ws, int we, int as, int ae
 /* set a sprite postion */
 void sprite_position(struct Sprite* sprite/*, int x, int y*/) {
  
-  /int x = sprite->x;
+  int x = sprite->x;
   int y = sprite->y;
 
   /* clear out the y coordinate */
