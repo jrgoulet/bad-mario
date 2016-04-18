@@ -232,11 +232,6 @@ int main( ) {
 
   /* sprite initialization */
   sprites[0] = new_Sprite("Marco", SIZE_64_64, 100, 88, 0, 0, 0, 0);
-
- 
-  //sprites_m[0] = sprites[0]->sprite_m;
-
-
   sprite_collision_init(sprites[0],21,47,64,24,40);
   sprite_animation_init(sprites[0],128,640,0,128,896,3328,0,0);
     //Goomba
@@ -248,11 +243,12 @@ int main( ) {
 
   /* loop forever */
   while (1) {
-
+    
   	for (int i = 0; i < NUM_SPRITES; i++) {
   		sprites_m[i] = sprites[i]->sprite_m;
   	}
-	
+	//update sprites--still testing
+    update_sprite(sprites[0], xscroll);
 	/* User Controls */
 	if (button_pressed(BUTTON_RIGHT)) {
 	  if (move_right(sprites[0])) {
@@ -273,7 +269,7 @@ int main( ) {
 	sprite_update_all();
 
 	/* delay some */
-	delay(400);
+	delay(200);
 
   }
 

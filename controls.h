@@ -15,6 +15,7 @@ int move_left(struct Sprite* sprite) {
 	sprite_set_horizontal_flip(sprite, 1);
 	
 	/* set movement speed */
+    //this is for animation, not speed.  Marco starts his walking at frame 128
 	sprite->move = 128;
 
 	/* walking animation */
@@ -34,7 +35,7 @@ int move_left(struct Sprite* sprite) {
 		/* else move left */
 		//sprite->x--;
 		sprite->x--; //added for jumping and falling
-		sprite_position(sprite);
+		sprite_position(sprite,sprite->x, sprite->y);
 		return 0;
 	}
 }
@@ -61,7 +62,7 @@ int move_right(struct Sprite* sprite) {
 		//sprite->x++;
 
 		sprite->x++; //added for jumping and falling
-		sprite_position(sprite);
+		sprite_position(sprite, sprite->x, sprite->y);
 		return 0;
 	}
 }

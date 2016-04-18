@@ -173,10 +173,10 @@ void sprite_animation_init(struct Sprite* sprite, int ws, int we, int as, int ae
 }
 
 /* set a sprite postion */
-void sprite_position(struct Sprite* sprite) {
+void sprite_position(struct Sprite* sprite, int x, int y) {
  
-  int x = sprite->x;
-  int y = sprite->y;
+  //int x = sprite->x;
+  //int y = sprite->y;
 
   /* clear out the y coordinate */
   sprite->sprite_m.attribute0 &= 0xff00;
@@ -201,7 +201,7 @@ void sprite_move(struct Sprite* sprite, int dx, int dy) {
   int x = sprite->sprite_m.attribute1 & 0x1ff;
 
   /* move to the new location */
-  sprite_position(sprite);
+  sprite_position(sprite, x + dx, y + dy);
 }
 
 /* change the vertical flip flag */
@@ -234,6 +234,25 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
   /* apply the new one */
   sprite->sprite_m.attribute2 |= (offset & 0x03ff);
 }
+
+
+
+void update_sprite(struct Sprite* sprite, int xscroll) {
+
+    if (sprite->move) {
+        sprite->counter++;
+        if (sprite->counter >= sprite->animation_delay) {
+            sprite->frame = sprite->frame + sprite->frame_interval;
+            if (sprite->frame > sprite->walk_end) {
+                sprite->frame = sprite->walk_start;
+            }
+        sprite_set_offset(sprite, sprite->frame);
+        sprite->counter = 0;
+        }
+    }
+    sprite_position(sprite, sprite->x, sprite->y);
+}
+
 
 
 /* finds which tile a screen coordinate maps to, taking scroll into account */
@@ -316,7 +335,7 @@ void sprite_update(struct Sprite* sprite, int xscroll) {
 
 
     /* set on screen position */
-    sprite_position(sprite);
+    sprite_position(sprite, sprite->x, sprite->y);
 }
 
 
