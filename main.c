@@ -248,7 +248,7 @@ int main( ) {
   		sprites_m[i] = sprites[i]->sprite_m;
   	}
 	//update sprites--still testing
-    update_sprite(sprites[0], xscroll);
+    //update_sprite(sprites[0], xscroll);
 	/* User Controls */
 	if (button_pressed(BUTTON_RIGHT)) {
 	  if (move_right(sprites[0])) {

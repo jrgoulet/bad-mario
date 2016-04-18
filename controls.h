@@ -35,7 +35,7 @@ int move_left(struct Sprite* sprite) {
 		/* else move left */
 		//sprite->x--;
 		sprite->x--; //added for jumping and falling
-		sprite_position(sprite,sprite->x, sprite->y);
+		sprite_position(sprite/*,sprite->x, sprite->y*/);
 		return 0;
 	}
 }
@@ -62,7 +62,7 @@ int move_right(struct Sprite* sprite) {
 		//sprite->x++;
 
 		sprite->x++; //added for jumping and falling
-		sprite_position(sprite, sprite->x, sprite->y);
+		sprite_position(sprite/*, sprite->x, sprite->y*/);
 		return 0;
 	}
 }
