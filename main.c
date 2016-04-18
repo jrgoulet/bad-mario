@@ -269,6 +269,8 @@ int main( ) {
 	} else {
 	  move_none(sprites[1]);
 	}
+    
+    //add button press for shooting
 
 	/* wait for vblank before scrolling and moving sprites */
 	wait_vblank();
