@@ -289,6 +289,8 @@ int main( ) {
   /* sprite initialization */
   sprites[0] = new_Sprite("Mario", SIZE_32_64, 200, 88, 0, 0, 0, 0);
   sprites[1] = new_Sprite("Megaman", SIZE_32_32, 100, 120, 1, 0, 384,0);
+  sprite_set_player(sprites[1]);
+
   //need to draw this off screen, then change x, y to come from the gun
   sprites[2] = new_Sprite("Bullet", SIZE_8_8, 130, 130, 0, 0, 608, 0);
 
@@ -303,23 +305,28 @@ int main( ) {
   
   /* set initial scroll to 0 */
   int xscroll = 0;
+  int sprite_scroll = 0;
   int bulletTravel = 0;
   /* loop forever */
   while (1) {
     
   	for (int i = 0; i < NUM_SPRITES; i++) {
-  		sprite_update(sprites[i]);
+  		sprite_update(sprites[i],sprite_scroll);
   		sprites_m[i] = sprites[i]->sprite_m;
   	}
+
+  	sprite_scroll = 0;
 	
     /* User Controls */
 	if (button_pressed(BUTTON_RIGHT)) {
 	  if (move_right(sprites[1])) {
 		xscroll++;
+		sprite_scroll--;
 	  }
 	} else if (button_pressed(BUTTON_LEFT)) {
 	  if (move_left(sprites[1])) {
 		xscroll--;
+		sprite_scroll++;
 	  }
 	} else {
 	  move_none(sprites[1]);

@@ -52,6 +52,7 @@ struct Sprite {
 	int facing;       /* which way sprite is facing */
     char* name; 		/* callsign */
   int airtime;
+  int player;
 
 
     
@@ -151,6 +152,7 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
     sprite->facing = h;         /* for knowing which way sprite is facing */
   sprite->airtime = 0;
 	sprite->sprite_m = sprite_mem_init(sprite,h,v,size,tile_index,priority);
+  sprite->player = 0;
 
 	/* return a pointer */
 	return sprite;
@@ -158,6 +160,10 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 
 void sprite_set_animation_delay(struct Sprite* sprite, int delay) {
 	sprite->animation_delay = delay;
+}
+
+void sprite_set_player(struct Sprite* sprite) {
+  sprite->player = 1;
 }
 
 void sprite_set_flip_counter(struct Sprite* sprite, int count) {
@@ -281,7 +287,7 @@ unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
     return tilemap[index];
 }
 
-void sprite_update(struct Sprite* sprite /*int xscroll*/) {
+void sprite_update(struct Sprite* sprite, int xscroll) {
     /* update y position and speed if falling */
     if (sprite->airtime == 1) {
       sprite->airtime = 0;
@@ -299,6 +305,9 @@ void sprite_update(struct Sprite* sprite /*int xscroll*/) {
         sprite->y += FALL_SPEED;
     }
 
+    if (sprite->player != 1) {
+      sprite->x = sprite->x + xscroll;
+    }
 
     /* set on screen position */
     sprite_position(sprite/*, sprite->x, sprite->y*/);
