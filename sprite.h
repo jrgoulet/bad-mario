@@ -45,8 +45,9 @@ struct Sprite {
 	int move; 				/* boolean, whether moving or not */
 	int border; 			/* pixel distance from edge of screen */
 	int falling; 			/* boolean, whether falling or not */
-	char* name; 			/* callsign */
-
+	int facing;             /* which way sprite is facing */
+    char* name; 			/* callsign */
+    
 	/* Animation Frames */
 	int frame_interval;
 	int walk_start;
