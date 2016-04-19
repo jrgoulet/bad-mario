@@ -311,6 +311,7 @@ int main( ) {
   while (1) {
     
   	for (int i = 0; i < NUM_SPRITES; i++) {
+  		sprite_update(sprites[i]);
   		sprites_m[i] = sprites[i]->sprite_m;
   	}
 	//update sprites--still testing
@@ -333,6 +334,9 @@ int main( ) {
         shoot(sprites[0], sprites[1], sprites[2], bulletTravel);
     }
 
+    if (button_pressed(BUTTON_UP)) {
+        jump(sprites[1]);
+    }
                 
 
 	/* wait for vblank before scrolling and moving sprites */

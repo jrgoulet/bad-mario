@@ -1,6 +1,10 @@
 #ifndef SPRITE_H_
 #define SPRITE_H_
 
+#define JUMP_SPEED  5
+#define FALL_SPEED  5
+#define FLOOR       115
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "map.h"
@@ -45,8 +49,11 @@ struct Sprite {
 	int move; 				/* boolean, whether moving or not */
 	int border; 			/* pixel distance from edge of screen */
 	int falling; 			/* boolean, whether falling or not */
-	int facing;             /* which way sprite is facing */
-    char* name; 			/* callsign */
+	int facing;       /* which way sprite is facing */
+    char* name; 		/* callsign */
+  int airtime;
+
+
     
 	/* Animation Frames */
 	int frame_interval;
@@ -142,7 +149,7 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 	sprite->animation_delay = 32;/* set in sprite_set_animation_delay */
 	sprite->move = 0;			/* initially not moving */
     sprite->facing = h;         /* for knowing which way sprite is facing */
-
+  sprite->airtime = 0;
 	sprite->sprite_m = sprite_mem_init(sprite,h,v,size,tile_index,priority);
 
 	/* return a pointer */
@@ -241,26 +248,6 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
   sprite->sprite_m.attribute2 |= (offset & 0x03ff);
 }
 
-
-/*
-void update_sprite(struct Sprite* sprite, int xscroll) {
-
-    if (sprite->move) {
-        sprite->counter++;
-        if (sprite->counter >= sprite->animation_delay) {
-            sprite->frame = sprite->frame + sprite->frame_interval;
-            if (sprite->frame > sprite->walk_end) {
-                sprite->frame = sprite->walk_start;
-            }
-        sprite_set_offset(sprite, sprite->frame);
-        sprite->counter = 0;
-        }
-    }
-    sprite_position(sprite, sprite->x, sprite->y);
-}
-*/
-
-
 /* finds which tile a screen coordinate maps to, taking scroll into account */
 unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
         const unsigned short* tilemap, int tilemap_w, int tilemap_h) {
@@ -294,49 +281,22 @@ unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
     return tilemap[index];
 }
 
-void sprite_update(struct Sprite* sprite, int xscroll) {
+void sprite_update(struct Sprite* sprite /*int xscroll*/) {
     /* update y position and speed if falling */
-    if (sprite->falling) {
-        sprite->y += sprite->yvel;
-        sprite->yvel += sprite->gravity;
+    if (sprite->airtime == 1) {
+      sprite->airtime = 0;
+      sprite->falling = 1;
     }
-
-    /* check which tile the sprite's feet are over */
-    unsigned short tile = tile_lookup((sprite->x >> 8) + 8, (sprite->y >> 8) + 32, xscroll,
-            0, map, map_width, map_height);
-
-    /* if it's block tile
-     * these numbers refer to the tile indices of the blocks the sprite can walk on */
-    if ((tile >= 1 && tile <= 6) || 
-        (tile >= 12 && tile <= 17)) {
-        /* stop the fall! */
-        sprite->falling = 0;
-        sprite->yvel = 0;
-
-        /* make him line up with the top of a block
-         * works by clearing out the lower bits to 0 */
-        sprite->y &= ~0x7ff;
-
-        /* move him down one because there is a one pixel gap in the image */
-        sprite->y++;
-
-    } else {
-        /* he is falling now */
-        sprite->falling = 1;
+    else if (sprite->airtime > 0) {
+      sprite->airtime -= 1;
+      sprite->y -= JUMP_SPEED;
     }
-
-
-    /* update animation if moving */
-    if (sprite->move) {
-        sprite->counter++;
-        if (sprite->counter >= sprite->animation_delay) {
-            sprite->frame = sprite->frame + 16;
-            if (sprite->frame > 16) {
-                sprite->frame = 0;
-            }
-            sprite_set_offset(sprite, sprite->frame);
-            sprite->counter = 0;
+    else if (sprite->falling) {
+        if ((sprite->y + FALL_SPEED) >= FLOOR) {
+          sprite->falling = 0;
+          sprite->y = FLOOR;
         }
+        sprite->y += FALL_SPEED;
     }
 
 
