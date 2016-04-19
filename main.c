@@ -31,6 +31,7 @@ Spring 2016
 #define MODE0			0x00 		/* the tile mode flags needed for display control register */
 #define BG0_ENABLE 		0x100
 #define BG1_ENABLE 		0x200
+#define BG2_ENABLE		0x400
 
 
 #define SPRITE_MAP_2D 	0x0 		/* flags to set sprite handling in display control register */
@@ -62,6 +63,7 @@ Spring 2016
 struct Sprite* Marco;
 struct Sprite_MEM sprites_m[NUM_SPRITES];
 struct Sprite* sprites[NUM_SPRITES];
+
 
 /* ====== Control Registers =========================================================================== */
 
@@ -147,8 +149,7 @@ void setup_background() {
 	  (background_width * background_height) / 2);
 
   memcpy16_dma((unsigned short*) char_block(1), (unsigned short*) text_data,
-            (text_width * text_height) / 2);
-
+	  (text_width * text_height) / 2);
 
   /* set all control the bits in this register */
   *bg0_control = 2 |    /* priority, 0 is highest, 3 is lowest */
@@ -175,29 +176,26 @@ void setup_background() {
   memcpy16_dma((unsigned short*) screen_block(24), (unsigned short*) maptrans, maptrans_width * maptrans_height);
 
     /* load the palette from the image into palette memory*/
-    //memcpy16_dma((unsigned short*) bg_palette, (unsigned short*) text_palette, PALETTE_SIZE);
+    //memcpy16_dma((unsigned short*) bg_palette, (unsigned short*) t_palette, PALETTE_SIZE);
 
   /* set all control the bits in this register */
   *bg2_control = 0 |    /* priority, 0 is highest, 3 is lowest */
-	(0 << 2)  |         /*the char block the image data is stored in */
+	(1 << 2)  |         /*the char block the image data is stored in */
 	(0 << 6)  |         /* the mosaic flag */
 	(1 << 7)  |         /* color mode, 0 is 16 colors, 1 is 256 colors */
-	(8 << 8) |         /* the screen block the tile data is stored in */
+	(28 << 8) |         /* the screen block the tile data is stored in */
 	(1 << 13) |         /* wrapping flag */
 	(0 << 14);          /* bg size, 0 is 256 */
 
 
-	/* clear the tile map in screen block 8 to all black tile*/
-  	volatile unsigned short* ptr = screen_block(8);
-    for (int i = 0; i < 32 * 32; i++) {
-		ptr[i] = 95;
-	}
+	/* clear the tile map in screen block 25 to all black tile*/
+  	volatile unsigned short* ptr = screen_block(28);
 
     /* clear the text map to be all blanks */
-    ptr = screen_block(8);
-    for (int i = 0; i < 32 * 32; i++) {
-    	ptr[i] = 0;
-    }
+ // ptr = screen_block(28);
+  //  for (int i = 0; i < 32 * 32; i++) {
+  //  	ptr[i] = 0;
+  //  }
 
 }
 
@@ -210,7 +208,7 @@ void set_text(char* str, int row, int col) {
     int missing = 32; 
 
     /* pointer to text map */
-    volatile unsigned short* ptr = screen_block(8);
+    volatile unsigned short* ptr = screen_block(28);
 
     /* for each character */
     while (*str) {
@@ -275,7 +273,7 @@ void setup_sprite_image() {
 
 int main( ) {
   /* we set the mode to mode 0 with bg0 on */
-  *display_control = MODE0 | BG0_ENABLE | BG1_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;
+  *display_control = MODE0 | BG0_ENABLE | BG1_ENABLE | BG2_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;
 
   /* setup the background 0 */
   setup_background();
@@ -285,7 +283,8 @@ int main( ) {
 
   /* clear all the sprites on screen now */
   //`sprite_clear();
-    char msg [32] = "This should be upper case!";
+  char score_text [32] = "Score";
+  char mission [32] = "Destroy Mario!!!";
 
   /* initiate random number generator */
   srand(0);
@@ -309,6 +308,9 @@ int main( ) {
   sprite_animation_init(sprites[1], 416, 480, 544, 576, 0, 0, 384, 416); 
   sprite_animation_init(sprites[2], 608, 648, 0, 0, 0, 0, 0, 0);
   
+  	/* for clearing text */
+	volatile unsigned short * ptr = screen_block(28);
+
   /* set initial scroll to 0 */
   int xscroll = 0;
   int sprite_scroll = 0;
@@ -318,10 +320,33 @@ int main( ) {
   int ai_move = 0;
   int ai_jump = 0;
 
+  int start_counter = 200;
+  int title_counter = 200;
+  int clear = 0;
+
   /* loop forever */
   while (1) {
     
-  	    set_text(msg, 0, 0);
+  		/* clear text */
+  	if (title_counter == 0 && clear == 0) {
+		clear = 1;
+    	for (int i = 0; i < 32 * 32; i++) {
+        	ptr[i] = 0;
+    	}
+    }
+
+
+    	if (title_counter > 0 && start_counter == 0) {
+    		set_text(mission, 6, 6);
+    		title_counter--;
+    	}
+  	    set_text(score_text, 1, 1);
+  	    
+  	    if (start_counter > 0) {
+  	    	 start_counter--;
+  	    }
+  	   
+
 
   	    ai_move = rand() % 100;
   	    ai_jump = rand() % 100;
@@ -365,6 +390,7 @@ int main( ) {
 	*bg0_x_scroll = xscroll/2;
 	*bg1_x_scroll = xscroll*2;
 	sprite_update_all();
+
 
 	/* delay some */
 	delay(400);
