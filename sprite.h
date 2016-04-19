@@ -119,7 +119,7 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 	switch (size) {
 		case SIZE_8_8:   sprite->frame_interval = 8; break;
 		case SIZE_16_16: sprite->frame_interval = 32; break;
-		case SIZE_32_32: sprite->frame_interval = 64; break;
+		case SIZE_32_32: sprite->frame_interval = 32; break;
 		case SIZE_64_64: sprite->frame_interval = 128; break;
 		case SIZE_16_8:  sprite->frame_interval = 24; break;
 		case SIZE_32_8:  sprite->frame_interval = 40; break;
@@ -128,7 +128,7 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 		case SIZE_8_16:  sprite->frame_interval = 24; break;
 		case SIZE_8_32:  sprite->frame_interval = 40; break;
 		case SIZE_16_32: sprite->frame_interval = 48; break;
-		case SIZE_32_64: sprite->frame_interval = 96; break;
+		case SIZE_32_64: sprite->frame_interval = 64; break;
 	}
 
 	/* initialization */

@@ -69,9 +69,9 @@ int move_right(struct Sprite* sprite) {
 
 /* stop the sprite from walking left/right */
 void move_none(struct Sprite* sprite) {
-	sprite->move = sprite->walk_start;
+	sprite->move = sprite->stand_start;
 	sprite->counter = 0;
-	sprite->frame = sprite->walk_start;
+	sprite->frame = sprite->stand_start;
 
 	sprite_set_offset(sprite, sprite->frame);
 }
