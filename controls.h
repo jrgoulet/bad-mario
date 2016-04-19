@@ -76,6 +76,11 @@ void move_none(struct Sprite* sprite) {
 	sprite_set_offset(sprite, sprite->frame);
 }
 
+void jump(struct Sprite* sprite) {
+	if (sprite->airtime == 0 && sprite->falling == 0) {
+      sprite->airtime = 20;
+  }
+}
 
 /* sprite shoot */
 //first is sprite shooting, second is bullet sprite

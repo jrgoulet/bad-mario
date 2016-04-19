@@ -1,9 +1,17 @@
 #ifndef SPRITE_H_
 #define SPRITE_H_
 
+#define JUMP_SPEED  5
+#define FALL_SPEED  5
+#define FLOOR       115
+#define POSMAX      260
+#define POSMIN      -64
+#define AI_WALKDELAY  10
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "map.h"
+#include "controls.h"
 
 enum SpriteSize {
   SIZE_8_8,
@@ -45,8 +53,14 @@ struct Sprite {
 	int move; 				/* boolean, whether moving or not */
 	int border; 			/* pixel distance from edge of screen */
 	int falling; 			/* boolean, whether falling or not */
-	int facing;             /* which way sprite is facing */
-    char* name; 			/* callsign */
+	int facing;       /* which way sprite is facing */
+    char* name; 		/* callsign */
+  int airtime;
+  int player;
+  int scroll;
+  int move_timer;
+  int jump_timer;
+  int ymin;
     
 	/* Animation Frames */
 	int frame_interval;
@@ -142,8 +156,13 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 	sprite->animation_delay = 32;/* set in sprite_set_animation_delay */
 	sprite->move = 0;			/* initially not moving */
     sprite->facing = h;         /* for knowing which way sprite is facing */
-
+  sprite->airtime = 0;
 	sprite->sprite_m = sprite_mem_init(sprite,h,v,size,tile_index,priority);
+  sprite->player = 0;
+  sprite->scroll = 0;
+  sprite->move_timer = 0;
+  sprite->jump_timer = 0;
+  sprite->ymin = FLOOR;
 
 	/* return a pointer */
 	return sprite;
@@ -151,6 +170,10 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 
 void sprite_set_animation_delay(struct Sprite* sprite, int delay) {
 	sprite->animation_delay = delay;
+}
+
+void sprite_set_player(struct Sprite* sprite) {
+  sprite->player = 1;
 }
 
 void sprite_set_flip_counter(struct Sprite* sprite, int count) {
@@ -241,26 +264,6 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
   sprite->sprite_m.attribute2 |= (offset & 0x03ff);
 }
 
-
-/*
-void update_sprite(struct Sprite* sprite, int xscroll) {
-
-    if (sprite->move) {
-        sprite->counter++;
-        if (sprite->counter >= sprite->animation_delay) {
-            sprite->frame = sprite->frame + sprite->frame_interval;
-            if (sprite->frame > sprite->walk_end) {
-                sprite->frame = sprite->walk_start;
-            }
-        sprite_set_offset(sprite, sprite->frame);
-        sprite->counter = 0;
-        }
-    }
-    sprite_position(sprite, sprite->x, sprite->y);
-}
-*/
-
-
 /* finds which tile a screen coordinate maps to, taking scroll into account */
 unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
         const unsigned short* tilemap, int tilemap_w, int tilemap_h) {
@@ -294,54 +297,151 @@ unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
     return tilemap[index];
 }
 
+void sprite_set_floor(struct Sprite* sprite, int y) {
+  sprite->ymin = y;
+}
+
 void sprite_update(struct Sprite* sprite, int xscroll) {
+
+    xscroll = xscroll * 2;
+
     /* update y position and speed if falling */
-    if (sprite->falling) {
-        sprite->y += sprite->yvel;
-        sprite->yvel += sprite->gravity;
+    if (sprite->airtime == 1) {
+      sprite->airtime = 0;
+      sprite->falling = 1;
     }
-
-    /* check which tile the sprite's feet are over */
-    unsigned short tile = tile_lookup((sprite->x >> 8) + 8, (sprite->y >> 8) + 32, xscroll,
-            0, map, map_width, map_height);
-
-    /* if it's block tile
-     * these numbers refer to the tile indices of the blocks the sprite can walk on */
-    if ((tile >= 1 && tile <= 6) || 
-        (tile >= 12 && tile <= 17)) {
-        /* stop the fall! */
-        sprite->falling = 0;
-        sprite->yvel = 0;
-
-        /* make him line up with the top of a block
-         * works by clearing out the lower bits to 0 */
-        sprite->y &= ~0x7ff;
-
-        /* move him down one because there is a one pixel gap in the image */
-        sprite->y++;
-
-    } else {
-        /* he is falling now */
-        sprite->falling = 1;
+    else if (sprite->airtime > 0) {
+      sprite->airtime -= 1;
+      sprite->y -= JUMP_SPEED;
     }
-
-
-    /* update animation if moving */
-    if (sprite->move) {
-        sprite->counter++;
-        if (sprite->counter >= sprite->animation_delay) {
-            sprite->frame = sprite->frame + 16;
-            if (sprite->frame > 16) {
-                sprite->frame = 0;
-            }
-            sprite_set_offset(sprite, sprite->frame);
-            sprite->counter = 0;
+    else if (sprite->falling) {
+        if ((sprite->y + FALL_SPEED) >= sprite->ymin) {
+          sprite->falling = 0;
+          sprite->y = sprite->ymin;
         }
+        sprite->y += FALL_SPEED;
     }
 
+    if (sprite->player != 1) {
+      sprite->x = sprite->x + xscroll;
+    }
 
+    if (sprite->x > POSMAX) {
+      sprite->x = POSMAX;
+      sprite->scroll += xscroll;
+    }
+
+    if (sprite->x < POSMIN) {
+      sprite->x = POSMIN;
+      sprite->scroll -= xscroll;
+    }
+
+    if (sprite->scroll > 0 && xscroll < 0) {
+      sprite->scroll += xscroll;
+    }
+
+    if (sprite->scroll < 0 && xscroll > 0) {
+      sprite->scroll += xscroll;
+    }
+
+    if (sprite->scroll > 0) {
+      sprite->x = POSMAX;
+    }
+
+    if (sprite->scroll < 0) {
+      sprite->x = POSMIN;
+    }
     /* set on screen position */
     sprite_position(sprite/*, sprite->x, sprite->y*/);
+}
+
+int sprite_move_right(struct Sprite* sprite) {
+  /* face right */
+  sprite_set_horizontal_flip(sprite, 0);
+  sprite->move = sprite->walk_start;
+
+  /* walking animation */
+  if (sprite->frame >= sprite->walk_start && sprite->frame < sprite->walk_end) {
+    sprite->frame = sprite->frame + sprite->frame_interval;
+  } else {
+    sprite->frame = sprite->walk_start;
+  }
+
+    sprite_set_offset(sprite, sprite->frame);
+    sprite->counter = 0;
+
+
+    sprite->x++; //added for jumping and falling
+    sprite_position(sprite/*, sprite->x, sprite->y*/);
+    return 0;
+}
+
+int sprite_move_left(struct Sprite* sprite) {
+  /* face right */
+  sprite_set_horizontal_flip(sprite, 1);
+  sprite->move = sprite->walk_start;
+
+  /* walking animation */
+  if (sprite->frame >= sprite->walk_start && sprite->frame < sprite->walk_end) {
+    sprite->frame = sprite->frame + sprite->frame_interval;
+  } else {
+    sprite->frame = sprite->walk_start;
+  }
+
+    sprite_set_offset(sprite, sprite->frame);
+    sprite->counter = 0;
+
+
+    sprite->x--; //added for jumping and falling
+    sprite_position(sprite/*, sprite->x, sprite->y*/);
+    return 0;
+}
+
+void sprite_move_none(struct Sprite* sprite) {
+  sprite->move = sprite->stand_start;
+  sprite->counter = 0;
+  sprite->frame = sprite->stand_start;
+  sprite_set_offset(sprite, sprite->frame);
+}
+
+void sprite_jump(struct Sprite* sprite) {
+  if (sprite->airtime == 0 && sprite->falling == 0) {
+      sprite->airtime = 20;
+  }
+}
+
+void sprite_ai(struct Sprite* com, struct Sprite* player, int move, int jump) {
+
+  if (com->move_timer == 0) {
+    sprite_move_none(com);
+  }
+
+  if (com->move_timer == 0 && move < 2) {
+    com->move_timer = 20;
+  }
+
+  if (com->jump_timer == 0 && jump < 1) {
+    com->jump_timer = 20;
+  }
+
+  if (com->x > player->x && com->move_timer > 0) {
+    sprite_move_left(com);
+    com->move_timer--;
+  }
+
+  if (com->x < player->x && com->move_timer > 0) {
+    sprite_move_right(com);
+    com->move_timer--;
+  }
+
+  if (com->jump_timer > 0 && jump < 1) {
+    sprite_jump(com);
+    com->jump_timer--;
+  }
+
+  if (com->move_timer < 0) com->move_timer = 0;
+  if (com->jump_timer < 0) com->jump_timer = 0;
+
 }
 
 
