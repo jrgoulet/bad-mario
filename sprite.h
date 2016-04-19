@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "map.h"
+#include "controls.h"
 
 enum SpriteSize {
   SIZE_8_8,
@@ -342,6 +343,62 @@ void sprite_update(struct Sprite* sprite, int xscroll) {
     }
     /* set on screen position */
     sprite_position(sprite/*, sprite->x, sprite->y*/);
+}
+
+int sprite_move_right(struct Sprite* sprite) {
+  /* face right */
+  sprite_set_horizontal_flip(sprite, 0);
+  sprite->move = sprite->walk_start;
+
+  /* walking animation */
+  if (sprite->frame >= sprite->walk_start && sprite->frame < sprite->walk_end) {
+    sprite->frame = sprite->frame + sprite->frame_interval;
+  } else {
+    sprite->frame = sprite->walk_start;
+  }
+
+    sprite_set_offset(sprite, sprite->frame);
+    sprite->counter = 0;
+
+
+    sprite->x++; //added for jumping and falling
+    sprite_position(sprite/*, sprite->x, sprite->y*/);
+    return 0;
+  }
+}
+
+int sprite_move_left(struct Sprite* sprite) {
+  /* face right */
+  sprite_set_horizontal_flip(sprite, 1);
+  sprite->move = sprite->walk_start;
+
+  /* walking animation */
+  if (sprite->frame >= sprite->walk_start && sprite->frame < sprite->walk_end) {
+    sprite->frame = sprite->frame + sprite->frame_interval;
+  } else {
+    sprite->frame = sprite->walk_start;
+  }
+
+    sprite_set_offset(sprite, sprite->frame);
+    sprite->counter = 0;
+
+
+    sprite->x--; //added for jumping and falling
+    sprite_position(sprite/*, sprite->x, sprite->y*/);
+    return 0;
+  }
+}
+
+void sprite_ai(struct Sprite* com, struct Sprite* player) {
+
+  if (com->x > player->x) {
+    sprite_move_left(com);
+  }
+
+  if (com->x < player->x) {
+    sprite_move_right(com);
+  }
+
 }
 
 

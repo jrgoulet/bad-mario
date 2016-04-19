@@ -284,7 +284,7 @@ int main( ) {
   /* clear all the sprites on screen now */
   //`sprite_clear();
     char msg [32] = "This should be upper case!";
-    set_text(msg, 0, 0);
+
 
   /* sprite initialization */
   sprites[0] = new_Sprite("Mario", SIZE_32_64, 200, 88, 0, 0, 0, 0);
@@ -310,6 +310,8 @@ int main( ) {
   /* loop forever */
   while (1) {
     
+  	    set_text(msg, 0, 0);
+
   	for (int i = 0; i < NUM_SPRITES; i++) {
   		sprite_update(sprites[i],sprite_scroll);
   		sprites_m[i] = sprites[i]->sprite_m;
@@ -341,6 +343,7 @@ int main( ) {
         jump(sprites[1]);
     }
                 
+    sprite_ai(sprites[0],sprites[1]);
 
 	/* wait for vblank before scrolling and moving sprites */
 	wait_vblank();
