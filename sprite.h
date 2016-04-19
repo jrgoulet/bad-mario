@@ -60,6 +60,7 @@ struct Sprite {
   int scroll;
   int move_timer;
   int jump_timer;
+  int ymin;
     
 	/* Animation Frames */
 	int frame_interval;
@@ -161,6 +162,7 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
   sprite->scroll = 0;
   sprite->move_timer = 0;
   sprite->jump_timer = 0;
+  sprite->ymin = FLOOR;
 
 	/* return a pointer */
 	return sprite;
@@ -295,6 +297,10 @@ unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
     return tilemap[index];
 }
 
+void sprite_set_floor(struct Sprite* sprite, int y) {
+  sprite->ymin = y;
+}
+
 void sprite_update(struct Sprite* sprite, int xscroll) {
 
     xscroll = xscroll * 2;
@@ -309,9 +315,9 @@ void sprite_update(struct Sprite* sprite, int xscroll) {
       sprite->y -= JUMP_SPEED;
     }
     else if (sprite->falling) {
-        if ((sprite->y + FALL_SPEED) >= FLOOR) {
+        if ((sprite->y + FALL_SPEED) >= sprite->ymin) {
           sprite->falling = 0;
-          sprite->y = FLOOR;
+          sprite->y = sprite->ymin;
         }
         sprite->y += FALL_SPEED;
     }
@@ -398,6 +404,12 @@ void sprite_move_none(struct Sprite* sprite) {
   sprite_set_offset(sprite, sprite->frame);
 }
 
+void sprite_jump(struct Sprite* sprite) {
+  if (sprite->airtime == 0 && sprite->falling == 0) {
+      sprite->airtime = 20;
+  }
+}
+
 void sprite_ai(struct Sprite* com, struct Sprite* player, int move, int jump) {
 
   if (com->move_timer == 0) {
@@ -421,6 +433,14 @@ void sprite_ai(struct Sprite* com, struct Sprite* player, int move, int jump) {
     sprite_move_right(com);
     com->move_timer--;
   }
+
+  if (com->jump_timer > 0 && jump < 1) {
+    sprite_jump(com);
+    com->jump_timer--;
+  }
+
+  if (com->move_timer < 0) com->move_timer = 0;
+  if (com->jump_timer < 0) com->jump_timer = 0;
 
 }
 

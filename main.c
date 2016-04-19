@@ -292,6 +292,8 @@ int main( ) {
 
   /* sprite initialization */
   sprites[0] = new_Sprite("Mario", SIZE_32_64, 200, 88, 0, 0, 0, 0);
+  sprite_set_floor(sprites[0],85);
+
   sprites[1] = new_Sprite("Megaman", SIZE_32_32, 100, 120, 1, 0, 384,0);
   sprite_set_player(sprites[1]);
 
