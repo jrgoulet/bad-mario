@@ -158,10 +158,10 @@ void sprite_set_flip_counter(struct Sprite* sprite, int count) {
 }
 
 void sprite_collision_init(struct Sprite* sprite, int l, int r, int u, int d, int b) {
-	sprite->leftHit = l;
-	sprite->rightHit = r;
-	sprite->topHit = u;
-	sprite->bottomHit = d;
+	sprite->leftHit = sprite->x + l;
+	sprite->rightHit = sprite->x +r;
+	sprite->topHit = sprite->y + u;
+	sprite->bottomHit = sprite->y + d;
 	sprite->border = b;
 }
 

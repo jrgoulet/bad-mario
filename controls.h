@@ -80,50 +80,12 @@ void move_none(struct Sprite* sprite) {
 /* sprite shoot */
 //first is sprite shooting, second is bullet sprite
 void shoot (struct Sprite* marco,struct Sprite* mario, struct Sprite* bullet, int dist) {
+    
+    // needs work!!!!
+    
     bullet->x +=8;
     sprite_position(bullet); 
-    /*
-    // find which way sprite is facing
-    if (marco->facing) {
-        // facing left
-        // shoot bullet to left, get x, y coord for gun to control bullet animation
-        while(dist > travelL) {
-            if(bullet->x < mario->leftHit) {
-                bullet->sprite_m.attribute0 = SCREEN_HEIGHT;
-                bullet->sprite_m.attribute1 = SCREEN_WIDTH;
-            }else {
-            bullet->x = bullet->x - 8;
-            dist-=8;
-            //at the end, draw bullet off screen, or if collision
-            sprite_position(bullet);
-            }
-            if(dist <= -80) {
-                bullet->sprite_m.attribute0 = SCREEN_HEIGHT;
-                bullet->sprite_m.attribute1 = SCREEN_WIDTH;
-            }
-        }
-    } else {
-        //facing right
-        //shoot bullet to right
-        while(dist < travelR) {
-            if(bullet->x > mario->rightHit) {
-                bullet->sprite_m.attribute0 = SCREEN_HEIGHT;
-                bullet->sprite_m.attribute1 = SCREEN_WIDTH;
-            } else {
-            bullet->x += 8;
-            dist +=8;
-            //at the end, draw bullet off screen, or if collision
-            // if (collision) {
-                //draw bullet off screen, end while
-            sprite_position(bullet);
-            }
-            if (dist >= 80) {
-                bullet->sprite_m.attribute0 = SCREEN_HEIGHT;
-                bullet->sprite_m.attribute1 = SCREEN_WIDTH;
-            }
-        }
 
-    }    */
  
 }
 
