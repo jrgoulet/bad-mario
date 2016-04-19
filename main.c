@@ -293,17 +293,14 @@ int main( ) {
   sprites[2] = new_Sprite("Bullet", SIZE_8_8, 130, 130, 0, 0, 608, 0);
 
   //need to UPDATE COLLISION VALUES
-  sprite_collision_init(sprites[0],21,47,64,24,40);
+  sprite_collision_init(sprites[0],6, 25, 20, 64,40);
+  sprite_collision_init(sprites[1], 5, 27, 8, 32, 40);
   // marco, mario, bullet animation cycles
   // -- need later!!!!!!     sprite_animation_init(sprites[0],128,640,0,128,896,3328,0,0);
   sprite_animation_init(sprites[0], 64, 320, 0, 0, 0, 0, 0, 64);
-  sprite_animation_init(sprites[1], 416 , 480, 544, 576, 0, 0, 384, 416); 
-  sprite_animation_init(sprites[2], 608, 648,0,0, 0, 0, 0,0);
-// WTF! WHY WONT IT CYCLE THROUGH THE APPROPRIATE SLIDES????!!!!!
-//Goomba
-/*  sprites[1] = new_Sprite("Goomba", SIZE_32_32, 200, 120, 0, 0,968 , 0);
-  sprite_collision_init(sprites[1], 5, 27, 10, 32, 30);
-  sprite_animation_init(sprites[1], 968, 1344, 968, 968, 968, 968, 968, 968);     */
+  sprite_animation_init(sprites[1], 416, 480, 544, 576, 0, 0, 384, 416); 
+  sprite_animation_init(sprites[2], 608, 648, 0, 0, 0, 0, 0, 0);
+  
   /* set initial scroll to 0 */
   int xscroll = 0;
   int bulletTravel = 0;
@@ -314,9 +311,8 @@ int main( ) {
   		sprite_update(sprites[i]);
   		sprites_m[i] = sprites[i]->sprite_m;
   	}
-	//update sprites--still testing
-    //update_sprite(sprites[0], xscroll);
-	/* User Controls */
+	
+    /* User Controls */
 	if (button_pressed(BUTTON_RIGHT)) {
 	  if (move_right(sprites[1])) {
 		xscroll++;
