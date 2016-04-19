@@ -21,6 +21,8 @@ Spring 2016
 #include "map.h"
 #include "maptrans.h"
 #include "text.h"
+#include <time.h>
+#include <stdlib.h>
 
 /* ====== Global Vars ================================================================================= */
 
@@ -285,6 +287,8 @@ int main( ) {
   //`sprite_clear();
     char msg [32] = "This should be upper case!";
 
+  /* initiate random number generator */
+  srand(0);
 
   /* sprite initialization */
   sprites[0] = new_Sprite("Mario", SIZE_32_64, 200, 88, 0, 0, 0, 0);
@@ -307,10 +311,19 @@ int main( ) {
   int xscroll = 0;
   int sprite_scroll = 0;
   int bulletTravel = 0;
+
+  /* AI vars */
+  int ai_move = 0;
+  int ai_jump = 0;
+
   /* loop forever */
   while (1) {
     
   	    set_text(msg, 0, 0);
+
+  	    ai_move = rand() % 100;
+  	    ai_jump = rand() % 100;
+
 
   	for (int i = 0; i < NUM_SPRITES; i++) {
   		sprite_update(sprites[i],sprite_scroll);
@@ -343,7 +356,7 @@ int main( ) {
         jump(sprites[1]);
     }
                 
-    sprite_ai(sprites[0],sprites[1]);
+    sprite_ai(sprites[0],sprites[1],ai_move,ai_jump);
 
 	/* wait for vblank before scrolling and moving sprites */
 	wait_vblank();

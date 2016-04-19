@@ -6,6 +6,7 @@
 #define FLOOR       115
 #define POSMAX      260
 #define POSMIN      -64
+#define AI_WALKDELAY  10
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -57,7 +58,8 @@ struct Sprite {
   int airtime;
   int player;
   int scroll;
-
+  int move_timer;
+  int jump_timer;
     
 	/* Animation Frames */
 	int frame_interval;
@@ -157,6 +159,8 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 	sprite->sprite_m = sprite_mem_init(sprite,h,v,size,tile_index,priority);
   sprite->player = 0;
   sprite->scroll = 0;
+  sprite->move_timer = 0;
+  sprite->jump_timer = 0;
 
 	/* return a pointer */
 	return sprite;
@@ -364,7 +368,6 @@ int sprite_move_right(struct Sprite* sprite) {
     sprite->x++; //added for jumping and falling
     sprite_position(sprite/*, sprite->x, sprite->y*/);
     return 0;
-  }
 }
 
 int sprite_move_left(struct Sprite* sprite) {
@@ -386,17 +389,37 @@ int sprite_move_left(struct Sprite* sprite) {
     sprite->x--; //added for jumping and falling
     sprite_position(sprite/*, sprite->x, sprite->y*/);
     return 0;
-  }
 }
 
-void sprite_ai(struct Sprite* com, struct Sprite* player) {
+void sprite_move_none(struct Sprite* sprite) {
+  sprite->move = sprite->stand_start;
+  sprite->counter = 0;
+  sprite->frame = sprite->stand_start;
+  sprite_set_offset(sprite, sprite->frame);
+}
 
-  if (com->x > player->x) {
-    sprite_move_left(com);
+void sprite_ai(struct Sprite* com, struct Sprite* player, int move, int jump) {
+
+  if (com->move_timer == 0) {
+    sprite_move_none(com);
   }
 
-  if (com->x < player->x) {
+  if (com->move_timer == 0 && move < 2) {
+    com->move_timer = 20;
+  }
+
+  if (com->jump_timer == 0 && jump < 1) {
+    com->jump_timer = 20;
+  }
+
+  if (com->x > player->x && com->move_timer > 0) {
+    sprite_move_left(com);
+    com->move_timer--;
+  }
+
+  if (com->x < player->x && com->move_timer > 0) {
     sprite_move_right(com);
+    com->move_timer--;
   }
 
 }
