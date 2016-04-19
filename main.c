@@ -268,11 +268,12 @@ int main( ) {
 	  move_none(sprites[1]);
 	}
     
+    int temp = sprites[1]->frame;
     //add button press for shooting
     if (button_pressed(BUTTON_A)) {
         shoot(sprites[0], sprites[1], sprites[2], bulletTravel);
     }
-
+    sprites[1]->frame = temp;
                 
 
 	/* wait for vblank before scrolling and moving sprites */

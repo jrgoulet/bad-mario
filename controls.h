@@ -79,12 +79,15 @@ void move_none(struct Sprite* sprite) {
 
 /* sprite shoot */
 //first is sprite shooting, second is bullet sprite
-void shoot (struct Sprite* marco,struct Sprite* mario, struct Sprite* bullet, int dist) {
-    
+void shoot (struct Sprite* mario, struct Sprite* megaman, struct Sprite* bullet, int dist) {
+    int tmp;
     // needs work!!!!
-    
+//    tmp = megaman->frame;
+    megaman->frame = megaman->atk_start; 
+    megaman->frame = megaman->frame + megaman->frame_interval; 
     bullet->x +=8;
     sprite_position(bullet); 
+//    megaman->frame = tmp;
 
  
 }
