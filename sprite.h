@@ -4,6 +4,8 @@
 #define JUMP_SPEED  5
 #define FALL_SPEED  5
 #define FLOOR       115
+#define POSMAX      260
+#define POSMIN      -64
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -53,7 +55,7 @@ struct Sprite {
     char* name; 		/* callsign */
   int airtime;
   int player;
-
+  int scroll;
 
     
 	/* Animation Frames */
@@ -153,6 +155,7 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
   sprite->airtime = 0;
 	sprite->sprite_m = sprite_mem_init(sprite,h,v,size,tile_index,priority);
   sprite->player = 0;
+  sprite->scroll = 0;
 
 	/* return a pointer */
 	return sprite;
@@ -288,6 +291,9 @@ unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
 }
 
 void sprite_update(struct Sprite* sprite, int xscroll) {
+
+    xscroll = xscroll * 2;
+
     /* update y position and speed if falling */
     if (sprite->airtime == 1) {
       sprite->airtime = 0;
@@ -309,6 +315,31 @@ void sprite_update(struct Sprite* sprite, int xscroll) {
       sprite->x = sprite->x + xscroll;
     }
 
+    if (sprite->x > POSMAX) {
+      sprite->x = POSMAX;
+      sprite->scroll += xscroll;
+    }
+
+    if (sprite->x < POSMIN) {
+      sprite->x = POSMIN;
+      sprite->scroll -= xscroll;
+    }
+
+    if (sprite->scroll > 0 && xscroll < 0) {
+      sprite->scroll += xscroll;
+    }
+
+    if (sprite->scroll < 0 && xscroll > 0) {
+      sprite->scroll += xscroll;
+    }
+
+    if (sprite->scroll > 0) {
+      sprite->x = POSMAX;
+    }
+
+    if (sprite->scroll < 0) {
+      sprite->x = POSMIN;
+    }
     /* set on screen position */
     sprite_position(sprite/*, sprite->x, sprite->y*/);
 }
