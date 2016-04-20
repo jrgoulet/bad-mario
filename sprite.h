@@ -181,6 +181,24 @@ void sprite_set_player(struct Sprite* sprite) {
   sprite->player = 1;
 }
 
+void sprite_set_pos(struct Sprite* sprite, int x, int y) {
+  sprite->x = x;
+  sprite->y = y;
+
+  /* clear out the y coordinate */
+  sprite->sprite_m.attribute0 &= 0xff00;
+
+  /* set the new y coordinate */
+  sprite->sprite_m.attribute0 |= (y & 0xff);
+
+  /* clear out the x coordinate */
+  sprite->sprite_m.attribute1 &= 0xfe00;
+
+  /* set the new x coordinate */
+  sprite->sprite_m.attribute1 |= (x & 0x1ff);
+
+}
+
 void sprite_set_flip_counter(struct Sprite* sprite, int count) {
 	sprite->counter = count;
 }
@@ -223,6 +241,7 @@ void sprite_position(struct Sprite* sprite/*, int x, int y*/) {
   sprite->sprite_m.attribute1 |= (x & 0x1ff);
 
 }
+
 
 /* move a sprite in a direction */
 void sprite_move(struct Sprite* sprite, int dx, int dy) {
