@@ -199,6 +199,54 @@ void setup_background() {
 
 }
 
+void setup_title_background() {
+
+  /* load the palette from the image into palette memory*/
+  memcpy16_dma((unsigned short*) bg_palette, (unsigned short*) background_palette, PALETTE_SIZE);
+
+  /* load the image into char block 0 */
+  memcpy16_dma((unsigned short*) char_block(0), (unsigned short*) background_data,
+	  (background_width * background_height) / 2);
+
+  memcpy16_dma((unsigned short*) char_block(1), (unsigned short*) text_data,
+	  (text_width * text_height) / 2);
+
+  /* set all control the bits in this register */
+  *bg0_control = 2 |    /* priority, 0 is highest, 3 is lowest */
+	(0 << 2)  |       /* the char block the image data is stored in */
+	(0 << 6)  |       /* the mosaic flag */
+	(1 << 7)  |       /* color mode, 0 is 16 colors, 1 is 256 colors */
+	(16 << 8) |       /* the screen block the tile data is stored in */
+	(1 << 13) |       /* wrapping flag */
+	(0 << 14);        /* bg size, 0 is 256x256 */
+
+  /* load the tile data into screen block 16 */
+  memcpy16_dma((unsigned short*) screen_block(16), (unsigned short*) map, map_width * map_height);
+
+    /* load the palette from the image into palette memory*/
+    //memcpy16_dma((unsigned short*) bg_palette, (unsigned short*) t_palette, PALETTE_SIZE);
+
+  /* set all control the bits in this register */
+  *bg2_control = 0 |    /* priority, 0 is highest, 3 is lowest */
+	(1 << 2)  |         /*the char block the image data is stored in */
+	(0 << 6)  |         /* the mosaic flag */
+	(1 << 7)  |         /* color mode, 0 is 16 colors, 1 is 256 colors */
+	(28 << 8) |         /* the screen block the tile data is stored in */
+	(1 << 13) |         /* wrapping flag */
+	(0 << 14);          /* bg size, 0 is 256 */
+
+
+	/* clear the tile map in screen block 25 to all black tile*/
+  	volatile unsigned short* ptr = screen_block(28);
+
+    /* clear the text map to be all blanks */
+ ptr = screen_block(16);
+    for (int i = 0; i < 32 * 32; i++) {
+    	ptr[i] = 7;
+    }
+
+}
+
 /* function to set text on the screen at a given location */
 void set_text(char* str, int row, int col) {                    
     /* find the index in the texmap to draw to */
@@ -273,10 +321,10 @@ void setup_sprite_image() {
 
 int main( ) {
   /* we set the mode to mode 0 with bg0 on */
-  *display_control = MODE0 | BG0_ENABLE | BG1_ENABLE | BG2_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;
+  *display_control = MODE0 | BG0_ENABLE | BG2_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;
 
   /* setup the background 0 */
-  setup_background();
+
 
   /* setup the sprite image data */
   setup_sprite_image();
@@ -324,8 +372,52 @@ int main( ) {
   int title_counter = 200;
   int clear = 0;
 
+  int title_sequence = 11500;
+
+	sprite_set_pos(sprites[0],-64,85);
+   	sprite_set_pos(sprites[1],-64,115);
+
+   	setup_title_background();
+
+  /* title sequence */
+   while (title_sequence > 0) {    
+
+
+   		sprite_move_right(sprites[0]);
+
+    	set_text(mission, 6, 6);
+    	title_counter--;
+    
+  	for (int i = 0; i < NUM_SPRITES; i++) {
+  		sprite_update(sprites[i],sprite_scroll);
+  		sprites_m[i] = sprites[i]->sprite_m;
+  	}
+
+	/* wait for vblank before scrolling and moving sprites */
+	wait_vblank();
+	*bg0_x_scroll = xscroll/2;
+	*bg1_x_scroll = xscroll*2;
+	sprite_update_all();
+
+
+	/* delay some */
+	delay(800);
+	title_sequence--;
+
+  }
+
+  	   	sprite_set_pos(sprites[0],100,85);
+   		sprite_set_pos(sprites[1],20,115);
+
+
+*display_control = MODE0 | BG0_ENABLE | BG1_ENABLE | BG2_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;
+   		  setup_background();
+
   /* loop forever */
   while (1) {
+
+
+
     
   		/* clear text */
   	if (title_counter == 0 && clear == 0) {
@@ -335,17 +427,7 @@ int main( ) {
     	}
     }
 
-
-    	if (title_counter > 0 && start_counter == 0) {
-    		set_text(mission, 6, 6);
-    		title_counter--;
-    	}
   	    set_text(score_text, 1, 1);
-  	    
-  	    if (start_counter > 0) {
-  	    	 start_counter--;
-  	    }
-  	   
 
 
   	    ai_move = rand() % 100;
