@@ -98,7 +98,6 @@ void shoot (struct Sprite* mario, struct Sprite* megaman, struct Sprite* bullet,
     }
     
     sprite_bullet(mario, megaman, bullet, travel);
-
  
 }
 

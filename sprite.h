@@ -167,6 +167,10 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
   sprite->move_timer = 0;
   sprite->jump_timer = 0;
   sprite->ymin = FLOOR;
+    sprite->leftHit = 0;
+    sprite->rightHit = 0;
+    sprite->topHit = 0;
+    sprite->bottomHit = 0;
     sprite->bulletActive = 0;
 
 	/* return a pointer */
@@ -469,13 +473,22 @@ void sprite_ai(struct Sprite* com, struct Sprite* player, int move, int jump) {
 }
 
 
+int mario_collide(struct Sprite* bullet, struct Sprite* mario) {
 
+    if (bullet->x <= mario->leftHit) { 
+        // && (bullet->y >= mario->topHit && bullet->y <= mario->bottomHit)) {
+        return 1;    
+    } else if (bullet->x >= mario->rightHit) { 
+        // && (bullet->y >= mario->topHit && bullet->y <= mario->bottomHit)){
+        return 1;
+    } else {
+        return 0;
+    }
+}
 
-
-void update_bullet(struct Sprite* bullet, struct Sprite* mario, int travel, int dir) {
+void update_bullet(struct Sprite* bullet, struct Sprite* mario, int travel, int dir, int coll) {
     if (dir == 0) {
-        if (bullet->x <= SCREEN_WIDTH) { // add mario collide variable from collision function here 
-              //  && ((bullet->x <= mario->leftHit) && (bullet->y > mario->topHit) && (bullet->y < mario->bottomHit))) {            
+        if (bullet->x <= SCREEN_WIDTH && coll == 1) {  
             bullet->x = bullet->x + travel;
         } else { 
             bullet->bulletActive = 0;
@@ -483,8 +496,7 @@ void update_bullet(struct Sprite* bullet, struct Sprite* mario, int travel, int 
             bullet->y = SCREEN_HEIGHT;
         }
     } else if (dir == 1) {
-        if (bullet->x >= 0) { // add mario collide variable from collision function here 
-             // && ((bullet->x >= mario->rightHit) && (bullet->y > mario->topHit) && (bullet->y < mario->bottomHit))) {        
+        if (bullet->x >= 0 && coll == 1) {  
             bullet->x = bullet->x - travel;
         } else { 
             bullet->bulletActive = 0;
@@ -500,25 +512,16 @@ void sprite_bullet(struct Sprite* mario,struct Sprite* megaman, struct Sprite* b
     // use horizontal flip to see which way bullet is traveling
     if (bullet->bulletActive == 1 && bullet->facing == 0) {
       
-        update_bullet(bullet, mario, travel, bullet->facing);            
+        update_bullet(bullet, mario, travel, bullet->facing, 1);
         
-
     } else if (bullet->bulletActive == 1 && bullet->facing == 1) {
        
-        update_bullet(bullet, mario, travel, bullet->facing);
+        update_bullet(bullet, mario, travel, bullet->facing, 1);
        
     } 
 
 }//end sprite_bullet
 
-/*
-void update_bullet(struct Sprite* bullet, int travel, int dir) {
-    if (dir == 0) {
-        bullet->x = bullet->x + travel;
-    } else if (dir == 1) {
-        bullet->x = bullet->x - travel;
-    }
-}  */
 
 
 #endif

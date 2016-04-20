@@ -498,7 +498,7 @@ int main( ) {
 			move_none(sprites[1]);
 		}
 
-
+        /* shoot */
 		if (button_pressed(BUTTON_A)) {
             int tmp = 0;
             z = 2;
@@ -507,35 +507,28 @@ int main( ) {
                     tmp = 1;
                     sprites[z]->bulletActive = 1;
                     shoot(sprites[0], sprites[1], sprites[z], bulletTravel);
-                    
                 } 
                 z++;
-                
-            } //end while
-        }// end buttonPressed A
+            } 
+        }
             
-        //if (
-		//shoot(sprites[0], sprites[1], sprites[2], bulletTravel);
-        //sprites[2]->bulletActive=1;
-		
-
-
+        /* jump */
 		if (button_pressed(BUTTON_UP)) {
 				jump(sprites[1]);
 		}
 		
-        //sprite_bullet(sprites[0], sprites[1], sprites[2], bulletTravel);
         
-        /* update active bullets */
+        /* update active bullets, and mario's hitbox */
+        sprite_collision_init(sprites[0],6, 25, 20, 64,40);
         z = 2;
         while (z <= bullets) {
             if (sprites[z]->bulletActive == 1) {
 
-                //update_bullet(sprites[2], bulletTravel);
-                update_bullet(sprites[z], sprites[0], bulletTravel, sprites[z]->facing);
+                int collide = mario_collide(sprites[z], sprites[0]);                
+                update_bullet(sprites[z], sprites[0], bulletTravel, sprites[z]->facing, collide);
             }   
             z++; 
-        }// end while
+        }
 
 
 
