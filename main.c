@@ -312,7 +312,7 @@ int main( ) {
   /* set initial scroll to 0 */
   int xscroll = 0;
   int sprite_scroll = 0;
-  int bulletTravel = 0;
+  int bulletTravel = 2;
 
   /* AI vars */
   int ai_move = 0;
@@ -349,20 +349,24 @@ int main( ) {
 	  move_none(sprites[1]);
 	}
     
-    int temp = sprites[1]->frame;
     //add button press for shooting
     if (button_pressed(BUTTON_A)) {
         shoot(sprites[0], sprites[1], sprites[2], bulletTravel);
+        sprites[2]->bulletActive=1;
+        //sprites[2]->facing = sprites[1]->facing;
     }
-<<<<<<< HEAD
-    sprites[1]->frame = temp;
-=======
+
 
     if (button_pressed(BUTTON_UP)) {
         jump(sprites[1]);
     }
->>>>>>> 6d15d1858192412a5d791601c619d36ada61e997
-                
+
+    //sprite_bullet(sprites[0], sprites[1], sprites[2], bulletTravel);
+    if (sprites[2]->bulletActive) {
+        //update_bullet(sprites[2], bulletTravel);
+        sprite_bullet(sprites[0], sprites[1], sprites[2], bulletTravel);
+    }
+
     sprite_ai(sprites[0],sprites[1],ai_move,ai_jump);
 
 	/* wait for vblank before scrolling and moving sprites */

@@ -39,6 +39,7 @@ int move_left(struct Sprite* sprite) {
 		return 0;
 	}
 }
+
 int move_right(struct Sprite* sprite) {
 	/* face right */
 	sprite_set_horizontal_flip(sprite, 0);
@@ -84,15 +85,16 @@ void jump(struct Sprite* sprite) {
 
 /* sprite shoot */
 //first is sprite shooting, second is bullet sprite
-void shoot (struct Sprite* mario, struct Sprite* megaman, struct Sprite* bullet, int dist) {
-    int tmp;
+void shoot (struct Sprite* mario, struct Sprite* megaman, struct Sprite* bullet, int travel) {
+    
+    bullet->bulletActive = 1;
+    bullet->facing = megaman->facing;
     // needs work!!!!
 //    tmp = megaman->frame;
-    megaman->frame = megaman->atk_start; 
-    megaman->frame = megaman->frame + megaman->frame_interval; 
-    bullet->x +=8;
-    sprite_position(bullet); 
+//    megaman->frame = megaman->atk_start; 
+//    megaman->frame = megaman->frame + megaman->frame_interval; 
 //    megaman->frame = tmp;
+    sprite_bullet(mario, megaman, bullet, travel);
 
  
 }
