@@ -472,38 +472,42 @@ void sprite_ai(struct Sprite* com, struct Sprite* player, int move, int jump) {
 
 
 
-void update_bullet(struct Sprite* bullet, int travel, int dir) {
-        if (dir == 0) {
+void update_bullet(struct Sprite* bullet, struct Sprite* mario, int travel, int dir) {
+    if (dir == 0) {
+        if (bullet->x <= SCREEN_WIDTH) { // add mario collide variable from collision function here 
+              //  && ((bullet->x <= mario->leftHit) && (bullet->y > mario->topHit) && (bullet->y < mario->bottomHit))) {            
             bullet->x = bullet->x + travel;
-        } else if (dir == 1) {
+        } else { 
+            bullet->bulletActive = 0;
+            bullet->x = SCREEN_WIDTH;
+            bullet->y = SCREEN_HEIGHT;
+        }
+    } else if (dir == 1) {
+        if (bullet->x >= 0) { // add mario collide variable from collision function here 
+             // && ((bullet->x >= mario->rightHit) && (bullet->y > mario->topHit) && (bullet->y < mario->bottomHit))) {        
             bullet->x = bullet->x - travel;
-        }   
+        } else { 
+            bullet->bulletActive = 0;
+            bullet->x = SCREEN_WIDTH;
+            bullet->y = SCREEN_HEIGHT;
+        }
+    }   
 }
+
 
 void sprite_bullet(struct Sprite* mario,struct Sprite* megaman, struct Sprite* bullet, int travel) {
     
     // use horizontal flip to see which way bullet is traveling
     if (bullet->bulletActive == 1 && bullet->facing == 0) {
-        bullet->x = megaman->x + 30;
-        bullet->y = megaman->y + 19; 
-        if (bullet->x <= SCREEN_WIDTH && ((bullet->x <= mario->leftHit) && (bullet->y > mario->topHit) && (bullet->y < mario->bottomHit))) {
-            update_bullet(bullet, travel, bullet->facing);            
-        }
+      
+        update_bullet(bullet, mario, travel, bullet->facing);            
+        
 
     } else if (bullet->bulletActive == 1 && bullet->facing == 1) {
-        bullet->x = megaman->x + 2;
-        bullet->y = megaman->y + 19;    
-        if (bullet->x >= 0 && ((bullet->x >= mario->rightHit) && (bullet->y > mario->topHit) && (bullet->y < mario->bottomHit))) {
-            update_bullet(bullet, travel, bullet->facing);
-            
-        }
-    
-    } else {
-
-        bullet->bulletActive = 0;
-        bullet->sprite_m.attribute0 = SCREEN_HEIGHT;
-        bullet->sprite_m.attribute1 = SCREEN_WIDTH;
-    }
+       
+        update_bullet(bullet, mario, travel, bullet->facing);
+       
+    } 
 
 }//end sprite_bullet
 

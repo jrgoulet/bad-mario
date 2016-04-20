@@ -330,7 +330,22 @@ int main( ) {
 	sprite_set_player(sprites[1]);
 
 	//need to draw this off screen, then change x, y to come from the gun
-	sprites[2] = new_Sprite("Bullet", SIZE_8_8, 130, 130, 0, 0, 608, 0);
+	
+    // commented for testing new bullet initialization
+    //sprites[2] = new_Sprite("Bullet", SIZE_8_8, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 608, 0);
+    
+    //number of bullets, 12 because sprite[2] is bullet
+    int bullets = 12;
+    // i is 2 because sprite[2] is first bullet
+    int z = 2;    
+    // initalize 10 bullets, just to start
+    while (z <= bullets) {
+        sprites[z] = new_Sprite("Bullet", SIZE_8_8, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 608, 0);
+        sprite_animation_init(sprites[z], 608, 648, 0, 0, 0, 0, 0, 0);
+
+        z++;
+    }
+
 
 	/* sprite collisions */
 	sprite_collision_init(sprites[0],6, 25, 20, 64,40);
@@ -344,7 +359,7 @@ int main( ) {
 	/* sprite animations */
 	sprite_animation_init(sprites[0], 64, 320, 0, 0, 0, 0, 0, 64);
 	sprite_animation_init(sprites[1], 416, 480, 544, 576, 0, 0, 384, 416); 
-	sprite_animation_init(sprites[2], 608, 648, 0, 0, 0, 0, 0, 0);
+	//sprite_animation_init(sprites[2], 608, 648, 0, 0, 0, 0, 0, 0);
 
 	/*						 *\
 	 * game variables        * =============================================================================
@@ -485,9 +500,24 @@ int main( ) {
 
 
 		if (button_pressed(BUTTON_A)) {
-			shoot(sprites[0], sprites[1], sprites[2], bulletTravel);
-            sprites[2]->bulletActive=1;
-		}
+            int tmp = 0;
+            z = 2;
+            while(z <= bullets && tmp == 0) {
+                if (sprites[z]->bulletActive == 0) {
+                    tmp = 1;
+                    sprites[z]->bulletActive = 1;
+                    shoot(sprites[0], sprites[1], sprites[z], bulletTravel);
+                    
+                } 
+                z++;
+                
+            } //end while
+        }// end buttonPressed A
+            
+        //if (
+		//shoot(sprites[0], sprites[1], sprites[2], bulletTravel);
+        //sprites[2]->bulletActive=1;
+		
 
 
 		if (button_pressed(BUTTON_UP)) {
@@ -495,11 +525,17 @@ int main( ) {
 		}
 		
         //sprite_bullet(sprites[0], sprites[1], sprites[2], bulletTravel);
-        if (sprites[2]->bulletActive) {
-            //update_bullet(sprites[2], bulletTravel);
-            sprite_bullet(sprites[0], sprites[1], sprites[2], bulletTravel);
-        }   
+        
+        /* update active bullets */
+        z = 2;
+        while (z <= bullets) {
+            if (sprites[z]->bulletActive == 1) {
 
+                //update_bullet(sprites[2], bulletTravel);
+                update_bullet(sprites[z], sprites[0], bulletTravel, sprites[z]->facing);
+            }   
+            z++; 
+        }// end while
 
 
 

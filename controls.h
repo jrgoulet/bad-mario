@@ -87,13 +87,16 @@ void jump(struct Sprite* sprite) {
 //first is sprite shooting, second is bullet sprite
 void shoot (struct Sprite* mario, struct Sprite* megaman, struct Sprite* bullet, int travel) {
     
-    bullet->bulletActive = 1;
     bullet->facing = megaman->facing;
-    // needs work!!!!
-//    tmp = megaman->frame;
-//    megaman->frame = megaman->atk_start; 
-//    megaman->frame = megaman->frame + megaman->frame_interval; 
-//    megaman->frame = tmp;
+    
+    if (bullet->facing == 1) {
+        bullet->x = megaman->x;
+        bullet->y = megaman->y + 19;
+    } else {
+        bullet->x = megaman->x + 30;
+        bullet->y = megaman->y + 19;
+    }
+    
     sprite_bullet(mario, megaman, bullet, travel);
 
  
