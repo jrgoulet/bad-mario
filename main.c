@@ -328,7 +328,7 @@ int main( ) {
 	\*						 */
 
 	sprites[0] = new_Sprite("Mario", SIZE_32_64, 200, 88, 0, 0, 0, 0);
-	sprite_set_floor(sprites[0],85);
+	sprite_set_floor(sprites[0],69);
 
 	sprites[1] = new_Sprite("Megaman", SIZE_32_32, 100, 120, 1, 0, 384,0);
 	sprite_set_player(sprites[1]);
@@ -375,16 +375,22 @@ int main( ) {
 	/* set initial scroll to 0 */
 	int xscroll = 0;
 	int sprite_scroll = 0;
-	int bulletTravel = 2;
+	int bulletTravel = 4;
     int bulletDist = 120;
     int fire = 0;
+    int has_moved = 0;
+    int has_jumped = 0;
+
 	/* AI vars */
 	int ai_move = 0;
 	int ai_jump = 0;
 
+	int shot_fired = 0;
 	int start_counter = 200;
 	int title_counter = 200;
 	int clear = 0;
+	int atk_timer = 0;
+	int tmp = 0;
 
 	sprite_set_pos(sprites[0],-64,90);
 	sprite_set_pos(sprites[1],-64,115);
@@ -474,6 +480,10 @@ int main( ) {
 	while (1) {
 
         fire = 0;
+        shot_fired = 0;
+        has_moved = 0;
+        has_jumped = 0;
+
 		/* AI decisions */
 		ai_move = rand() % 100;
 		ai_jump = rand() % 100;
@@ -493,18 +503,18 @@ int main( ) {
 				xscroll++;
 				sprite_scroll--;
 			}
+			has_moved = 1;
 		} 
 		else if (button_pressed(BUTTON_LEFT)) {
 			if (move_left(sprites[1])) {
 				xscroll--;
 				sprite_scroll++;
 			}
+			has_moved = 1;
 		} 
-		else {
-			move_none(sprites[1]);
-		}
+		
 
-        /* shoot */
+         /* shoot */
         int tmp = 0;
 		if (button_pressed(BUTTON_A)) {
             //int tmp = 0;
@@ -542,8 +552,6 @@ int main( ) {
             }   
             z++; 
         }
-
-
 
 
 		/* sprite behavior */							

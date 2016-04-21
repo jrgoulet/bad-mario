@@ -372,7 +372,7 @@ void sprite_update(struct Sprite* sprite, int xscroll) {
     if (sprite->scroll < 0 && xscroll > 0) {
       sprite->scroll += xscroll;
     }
-
+    /*
     if (sprite->scroll > 0) {
       sprite->x = POSMAX;
     }
@@ -380,6 +380,7 @@ void sprite_update(struct Sprite* sprite, int xscroll) {
     if (sprite->scroll < 0) {
       sprite->x = POSMIN;
     }
+    */
     /* set on screen position */
     sprite_position(sprite/*, sprite->x, sprite->y*/);
 }
