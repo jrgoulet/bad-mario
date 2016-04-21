@@ -467,7 +467,7 @@ int mario_collide(struct Sprite* bullet, struct Sprite* mario) {
     }
 }
 
-/*
+
 int update_knockdown(int knockdown) {
 
     knockdown++;
@@ -481,7 +481,7 @@ int update_hitCount(int hitCount) {
     return hitCount;
 
 }
-*/
+
 
 void update_bullet(struct Sprite* bullet, struct Sprite* mario, int travel, int dir, int coll, int dist) {
     if (dir == 0) {
@@ -523,15 +523,15 @@ void sprite_bullet(struct Sprite* mario,struct Sprite* megaman, struct Sprite* b
     
 }//end sprite_bullet
 
-/*
+
 int mario_knockdown(struct Sprite* mario, int marioKnock) {
 
     if (marioKnock > 10) {
         //knock back mario if hit 10 times
         if (mario->facing == 1) {
-            mario->x = mario->x - 20;
+            mario->x = mario->x + 25;
         } else {
-            mario->x = mario->x + 20;
+            mario->x = mario->x - 25;
         }
 
         marioKnock = 0;
@@ -539,7 +539,7 @@ int mario_knockdown(struct Sprite* mario, int marioKnock) {
     }
     return marioKnock;
 }
-*/
+
 
 
 

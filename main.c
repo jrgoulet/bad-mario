@@ -380,13 +380,13 @@ int main( ) {
     int fire = 0;
     int has_moved = 0;
     int has_jumped = 0;
-    //int collide;
+    int collide;
 
 	/* AI vars */
 	int ai_move = 0;
 	int ai_jump = 0;
-    //int marioHitCount = 0;
-    //int marioKnockback = 0;
+    int marioHitCount = 0;
+    int marioKnockback = 0;
 	int shot_fired = 0;
 	int start_counter = 200;
 	int title_counter = 200;
@@ -480,7 +480,7 @@ int main( ) {
 
 	/* loop forever */
 	while (1) {
-        //collide = 1;
+        collide = 1;
         
         shot_fired = 0;
         has_moved = 0;
@@ -553,11 +553,11 @@ int main( ) {
         while (z <= bullets) {
             if (sprites[z]->bulletActive == 1) {
 
-                int collide = mario_collide(sprites[z], sprites[0]);               
-              //  if(collide == 0) {
-              //     marioKnockback = update_knockdown(marioKnockback); 
-              //     marioHitCount = update_hitCount(marioHitCount);
-              //  }
+                collide = mario_collide(sprites[z], sprites[0]);               
+                if(collide == 0) {
+                   marioKnockback = update_knockdown(marioKnockback); 
+                   marioHitCount = update_hitCount(marioHitCount);
+                }
                 update_bullet(sprites[z], sprites[0], bulletTravel, sprites[z]->facing, collide, bulletDist);
             }   
             z++; 
@@ -567,7 +567,7 @@ int main( ) {
 		/* sprite behavior */							
 		sprite_ai(sprites[0],sprites[1],ai_move,ai_jump);
 
-        //marioKnockback = mario_knockdown(sprites[0], marioKnockback);
+        marioKnockback = mario_knockdown(sprites[0], marioKnockback);
 
 		/* wait for vblank before scrolling and moving sprites */
 		wait_vblank();
