@@ -241,6 +241,16 @@ void setup_background2() {
 
 }
 
+void setup_background3() {
+
+	/* loop through each column of the screen */
+	for (int row = 0; row < SCREEN_HEIGHT; row++) { 
+			for (int col = 0; col < SCREEN_WIDTH; col++) {
+					put_pixel(row, col, game_over_data[row * SCREEN_WIDTH + col]);
+			}
+	}
+
+}
 
 /* function to set text on the screen at a given location */
 void set_text(char* str, int row, int col) {                    
@@ -434,6 +444,7 @@ int main( ) {
     int fire = 0;
     int has_moved = 0;
     int collide;
+    int game_over_flag = 0;
 
 	/* AI vars */
 	int ai_move = 0;
@@ -452,6 +463,7 @@ int main( ) {
 
 	char score_text [5] = "Score";
 	char* score = "0";
+	char game_over_text [16] = "Game Over";
 
 	/*						 *\
 	 * title sequence        * =============================================================================
@@ -484,8 +496,8 @@ int main( ) {
 			sprites_m[i] = sprites[i]->sprite_m;
 		}
 		wait_vblank();
-		*bg0_x_scroll = xscroll/2;
-		*bg1_x_scroll = xscroll*2;
+		//*bg0_x_scroll = xscroll/2;
+		//*bg1_x_scroll = xscroll*2;
 		sprite_update_all();
 		delay(800);
 	}
@@ -497,8 +509,8 @@ int main( ) {
 	}
 
 	wait_vblank();
-		*bg0_x_scroll = xscroll/2;
-		*bg1_x_scroll = xscroll*2;
+		//*bg0_x_scroll = xscroll/2;
+		//*bg1_x_scroll = xscroll*2;
 		sprite_update_all();
 		delay(10000);
 	char msg_04 [32] = "I'm gonna";
@@ -556,6 +568,12 @@ int main( ) {
 		for (int i = 0; i < NUM_SPRITES; i++) {
 			sprite_update(sprites[i],sprite_scroll);
 			sprites_m[i] = sprites[i]->sprite_m;
+		}
+
+		/* check game_over */
+		if (game_over_flag == 1) {
+			set_text(game_over_text, 3, 1); 
+			break;
 		}
 
 		/* ? */
@@ -626,9 +644,13 @@ int main( ) {
             z++; 
         }
 
-		/* sprite behavior */							
+		/* sprite behavior */						
 		sprite_ai(sprites[0],sprites[1],ai_move,ai_jump);
         
+		if (sprite_check_collision(sprites[1],sprites[0]) == 1) {
+			game_over_flag = 1;
+		}
+
 
 		/* wait for vblank before scrolling and moving sprites */
 		wait_vblank();
@@ -641,7 +663,43 @@ int main( ) {
 
 	}
 
+	/*						 *\
+	 * death sequence        * =============================================================================
+	\*						 */
+
+
+
+	/* jump */
+	sprites[1]->airtime = 10;
+	sprites[1]->ymin = 180;
+
+	/* fall to death */
+	while (sprites[1]->y < sprites[1]->ymin) {
+		for (int i = 0; i < NUM_SPRITES; i++) {
+			sprite_update(sprites[i],sprite_scroll);
+			sprites_m[i] = sprites[i]->sprite_m;
+		}
+		wait_vblank();
+		*bg0_x_scroll = xscroll/2;
+		*bg1_x_scroll = xscroll*2;
+		sprite_update_all();
+		delay(5000);
+	}
+	
+	delay(80000);
+
+	*display_control = MODE3 | BG2_ENABLE;
+	
+	wait_vblank();
+	setup_background3();
+
+	while(1) {}
+
+
+
+
 }
+
 
 /* the game boy advance uses "interrupts" to handle certain situations
  * for now we will ignore these */

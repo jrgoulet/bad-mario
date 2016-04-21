@@ -54,20 +54,20 @@ struct Sprite {
 	int border; 			/* pixel distance from edge of screen */
 	int falling; 			/* boolean, whether falling or not */
 	int facing;       /* which way sprite is facing */
-    char* name; 		/* callsign */
-    
-    int airtime;
-    int player;
-    int scroll;
-    int move_timer;
-    int jump_timer;
-    int ymin;
+	char* name; 		/* callsign */
+	
+	int airtime;
+	int player;
+	int scroll;
+	int move_timer;
+	int jump_timer;
+	int ymin;
 
-    
-    int bulletActive;       /* if bullet is active */     
-    int distTravel;         /* for bullet distance traveled */
+	
+	int bulletActive;       /* if bullet is active */     
+	int distTravel;         /* for bullet distance traveled */
 	int lastFired;
-    /* Animation Frames */
+	/* Animation Frames */
 	int frame_interval;
 	int walk_start;
 	int walk_end;
@@ -87,7 +87,7 @@ struct Sprite_MEM sprite_mem_init (struct Sprite* sprite, int h, int v, enum Spr
 	struct Sprite_MEM sprite_m;
 
 	int size_bits, shape_bits;
-  	switch (size) {
+	switch (size) {
 		case SIZE_8_8:   size_bits = 0; shape_bits = 0; break;
 		case SIZE_16_16: size_bits = 1; shape_bits = 0; break;
 		case SIZE_32_32: size_bits = 2; shape_bits = 0; break;
@@ -159,21 +159,21 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 	sprite->falling = 0;		/* initially not falling */
 	sprite->animation_delay = 16;// 32;/* set in sprite_set_animation_delay */
 	sprite->move = 0;			/* initially not moving */
-    sprite->facing = h;         /* for knowing which way sprite is facing */
-    sprite->airtime = 0;
+	sprite->facing = h;         /* for knowing which way sprite is facing */
+	sprite->airtime = 0;
 	sprite->sprite_m = sprite_mem_init(sprite,h,v,size,tile_index,priority);
-    sprite->player = 0;
-    sprite->scroll = 0;
-    sprite->move_timer = 0;
-    sprite->jump_timer = 0;
-    sprite->ymin = FLOOR;
-    sprite->leftHit = 0;
-    sprite->rightHit = 0;
-    sprite->topHit = 0;
-    sprite->bottomHit = 0;
-    sprite->bulletActive = 0;
-    sprite->distTravel = 0;
-    sprite->lastFired = 0;
+	sprite->player = 0;
+	sprite->scroll = 0;
+	sprite->move_timer = 0;
+	sprite->jump_timer = 0;
+	sprite->ymin = FLOOR;
+	sprite->leftHit = 0;
+	sprite->rightHit = 0;
+	sprite->topHit = 0;
+	sprite->bottomHit = 0;
+	sprite->bulletActive = 0;
+	sprite->distTravel = 0;
+	sprite->lastFired = 0;
 	/* return a pointer */
 	return sprite;
 }
@@ -269,24 +269,24 @@ void sprite_move(struct Sprite* sprite, int dx, int dy) {
 /* change the vertical flip flag */
 void sprite_set_vertical_flip(struct Sprite* sprite, int vertical_flip) {
   if (vertical_flip) {
-    /* set the bit */
-    sprite->sprite_m.attribute1 |= 0x2000;
+	/* set the bit */
+	sprite->sprite_m.attribute1 |= 0x2000;
   } else {
-    /* clear the bit */
-    sprite->sprite_m.attribute1 &= 0xdfff;
+	/* clear the bit */
+	sprite->sprite_m.attribute1 &= 0xdfff;
   }
 }
 
 /* change the vertical flip flag */
 void sprite_set_horizontal_flip(struct Sprite* sprite, int horizontal_flip) {
   if (horizontal_flip) {
-    /* set the bit */
-    sprite->sprite_m.attribute1 |= 0x1000;
-    sprite->facing = 1;
+	/* set the bit */
+	sprite->sprite_m.attribute1 |= 0x1000;
+	sprite->facing = 1;
   } else {
-    /* clear the bit */
-    sprite->sprite_m.attribute1 &= 0xefff;
-    sprite->facing = 0;
+	/* clear the bit */
+	sprite->sprite_m.attribute1 &= 0xefff;
+	sprite->facing = 0;
   }
 }
 
@@ -307,99 +307,93 @@ void sprite_set_floor(struct Sprite* sprite, int y) {
 
 void sprite_update(struct Sprite* sprite, int xscroll) {
 
-    xscroll = xscroll * 2;
+	xscroll = xscroll * 2;
 
-    /* update y position and speed if falling */
-    if (sprite->airtime == 1) {
-      sprite->airtime = 0;
-      sprite->falling = 1;
-    }
-    else if (sprite->airtime > 0) {
-      sprite->airtime -= 1;
-      sprite->y -= JUMP_SPEED;
-    }
-    else if (sprite->falling) {
-        if ((sprite->y + FALL_SPEED) >= sprite->ymin) {
-          sprite->falling = 0;
-          sprite->y = sprite->ymin;
-        }
-        sprite->y += FALL_SPEED;
-    }
+	/* update y position and speed if falling */
+	if (sprite->airtime == 1) {
+	  sprite->airtime = 0;
+	  sprite->falling = 1;
+	}
+	else if (sprite->airtime > 0) {
+	  sprite->airtime -= 1;
+	  sprite->y -= JUMP_SPEED;
+	}
+	else if (sprite->falling) {
+		if ((sprite->y + FALL_SPEED) >= sprite->ymin) {
+		  sprite->falling = 0;
+		  sprite->y = sprite->ymin;
+		}
+		sprite->y += FALL_SPEED;
+	}
 
-    if (sprite->player != 1) {
-      sprite->x = sprite->x + xscroll;
-    }
+	if (sprite->player != 1) {
+	  sprite->x = sprite->x + xscroll;
+	}
 
-    if (sprite->x > POSMAX) {
-      sprite->x = POSMAX;
-      sprite->scroll += xscroll;
-    }
+	if (sprite->x > POSMAX) {
+	  sprite->x = POSMAX;
+	  sprite->scroll += xscroll;
+	}
 
-    if (sprite->x < POSMIN) {
-      sprite->x = POSMIN;
-      sprite->scroll -= xscroll;
-    }
+	if (sprite->x < POSMIN) {
+	  sprite->x = POSMIN;
+	  sprite->scroll -= xscroll;
+	}
 
-    if (sprite->scroll > 0 && xscroll < 0) {
-      sprite->scroll += xscroll;
-    }
+	if (sprite->scroll > 0 && xscroll < 0) {
+	  sprite->scroll += xscroll;
+	}
 
-    if (sprite->scroll < 0 && xscroll > 0) {
-      sprite->scroll += xscroll;
-    }
-    /*
-    if (sprite->scroll > 0) {
-      sprite->x = POSMAX;
-    }
+	if (sprite->scroll < 0 && xscroll > 0) {
+	  sprite->scroll += xscroll;
+	}
 
-    if (sprite->scroll < 0) {
-      sprite->x = POSMIN;
-    }
-    */
-    /* set on screen position */
-    sprite_position(sprite);
+	/* set on screen position */
+	sprite_position(sprite);
 }
 
 
 int sprite_move_right(struct Sprite* sprite) {
+
   /* face right */
   sprite_set_horizontal_flip(sprite, 0);
   sprite->move = sprite->walk_start;
 
   /* walking animation */
   if (sprite->frame >= sprite->walk_start && sprite->frame < sprite->walk_end) {
-    sprite->frame = sprite->frame + sprite->frame_interval;
+	sprite->frame = sprite->frame + sprite->frame_interval;
   } else {
-    sprite->frame = sprite->walk_start;
+	sprite->frame = sprite->walk_start;
   }
 
-    sprite_set_offset(sprite, sprite->frame);
-    sprite->counter = 0;
+	sprite_set_offset(sprite, sprite->frame);
+	sprite->counter = 0;
 
-    sprite->x++; 
-    sprite_position(sprite);
-    return 0;
+	sprite->x++; 
+	sprite_position(sprite);
+	return 0;
 }
 
 
 int sprite_move_left(struct Sprite* sprite) {
+
   /* face right */
   sprite_set_horizontal_flip(sprite, 1);
   sprite->move = sprite->walk_start;
 
   /* walking animation */
   if (sprite->frame >= sprite->walk_start && sprite->frame < sprite->walk_end) {
-    sprite->frame = sprite->frame + sprite->frame_interval;
+	sprite->frame = sprite->frame + sprite->frame_interval;
   } else {
-    sprite->frame = sprite->walk_start;
+	sprite->frame = sprite->walk_start;
   }
 
-    sprite_set_offset(sprite, sprite->frame);
-    sprite->counter = 0;
+	sprite_set_offset(sprite, sprite->frame);
+	sprite->counter = 0;
 
-    sprite->x--; 
-    sprite_position(sprite);
-    return 0;
+	sprite->x--; 
+	sprite_position(sprite);
+	return 0;
 }
 
 
@@ -413,7 +407,7 @@ void sprite_move_none(struct Sprite* sprite) {
 
 void sprite_jump(struct Sprite* sprite) {
   if (sprite->airtime == 0 && sprite->falling == 0) {
-      sprite->airtime = 20;
+	  sprite->airtime = 30;
   }
 }
 
@@ -421,30 +415,30 @@ void sprite_jump(struct Sprite* sprite) {
 void sprite_ai(struct Sprite* com, struct Sprite* player, int move, int jump) {
 
   if (com->move_timer == 0) {
-    sprite_move_none(com);
+	sprite_move_none(com);
   }
 
   if (com->move_timer == 0 && move < 2) {
-    com->move_timer = 20;
+	com->move_timer = 20;
   }
 
   if (com->jump_timer == 0 && jump < 1) {
-    com->jump_timer = 20;
+	com->jump_timer = 20;
   }
 
   if (com->x > player->x && com->move_timer > 0) {
-    sprite_move_left(com);
-    com->move_timer--;
+	sprite_move_left(com);
+	com->move_timer--;
   }
 
   if (com->x < player->x && com->move_timer > 0) {
-    sprite_move_right(com);
-    com->move_timer--;
+	sprite_move_right(com);
+	com->move_timer--;
   }
 
   if (com->jump_timer > 0 && jump < 1) {
-    sprite_jump(com);
-    com->jump_timer--;
+	sprite_jump(com);
+	com->jump_timer--;
   }
 
   if (com->move_timer < 0) com->move_timer = 0;
@@ -455,20 +449,20 @@ void sprite_ai(struct Sprite* com, struct Sprite* player, int move, int jump) {
 
 int mario_collide(struct Sprite* bullet, struct Sprite* mario) {
 
-    if (bullet->x <= mario->leftHit) { 
-        
-        return 1;    
-    } else if (bullet->x >= mario->rightHit) { 
-        
-        return 1;
-    } else {
-        if (bullet->y > mario->topHit && bullet->y < mario->bottomHit) {
-            return 0;
-        }else {
-            return 1;
-        }
-        
-    }
+	if (bullet->x <= mario->leftHit) { 
+		
+		return 1;    
+	} else if (bullet->x >= mario->rightHit) { 
+		
+		return 1;
+	} else {
+		if (bullet->y > mario->topHit && bullet->y < mario->bottomHit) {
+			return 0;
+		}else {
+			return 1;
+		}
+		
+	}
 }
 
 
@@ -478,65 +472,69 @@ int activeBullet(int n);
 
 /* update score variable */
 int update_hitCount(int hitCount) {
-    
-    hitCount++;
-    return hitCount;
+	
+	hitCount++;
+	return hitCount;
 }
 
 
 void update_bullet(struct Sprite* bullet, struct Sprite* mario, int travel, int dir, int coll, int dist) {
-    if (dir == 0) {
-        if (bullet->distTravel <= dist && coll == 1) {  
-            bullet->x = bullet->x + travel;
-            bullet->distTravel = bullet->distTravel + travel;
-        } else { 
-            bullet->bulletActive = activeBullet(bullet->bulletActive); 
-            bullet->x = SCREEN_WIDTH;
-            bullet->y = SCREEN_HEIGHT;
-            bullet->distTravel = 0;
-        }
-    } else if (dir == 1) {
-        if (bullet->distTravel <= dist && coll == 1) {  
-            bullet->x = bullet->x - travel;
-            bullet->distTravel = bullet->distTravel + travel;
-        } else { 
-            bullet->bulletActive = activeBullet(bullet->bulletActive); 
-            bullet->distTravel = 0;
-            bullet->x = SCREEN_WIDTH;
-            bullet->y = SCREEN_HEIGHT;
-        }
-    }   
+	if (dir == 0) {
+		if (bullet->distTravel <= dist && coll == 1) {  
+			bullet->x = bullet->x + travel;
+			bullet->distTravel = bullet->distTravel + travel;
+		} else { 
+			bullet->bulletActive = activeBullet(bullet->bulletActive); 
+			bullet->x = SCREEN_WIDTH;
+			bullet->y = SCREEN_HEIGHT;
+			bullet->distTravel = 0;
+		}
+	} else if (dir == 1) {
+		if (bullet->distTravel <= dist && coll == 1) {  
+			bullet->x = bullet->x - travel;
+			bullet->distTravel = bullet->distTravel + travel;
+		} else { 
+			bullet->bulletActive = activeBullet(bullet->bulletActive); 
+			bullet->distTravel = 0;
+			bullet->x = SCREEN_WIDTH;
+			bullet->y = SCREEN_HEIGHT;
+		}
+	}   
 }
 
 
 void sprite_bullet(struct Sprite* mario,struct Sprite* megaman, struct Sprite* bullet, int travel, int dist) {
-    
-    // use horizontal flip to see which way bullet is traveling
-    if (bullet->bulletActive == 1 && bullet->facing == 0) {
-      
-        update_bullet(bullet, mario, travel, bullet->facing, 1, dist);
-        
-    } else if (bullet->bulletActive == 1 && bullet->facing == 1) {
-       
-        update_bullet(bullet, mario, travel, bullet->facing, 1, dist);
-       
-    } 
-    
-}//end sprite_bullet
+	
+	// use horizontal flip to see which way bullet is traveling
+	if (bullet->bulletActive == 1 && bullet->facing == 0) {
+	  
+		update_bullet(bullet, mario, travel, bullet->facing, 1, dist);
+		
+	} else if (bullet->bulletActive == 1 && bullet->facing == 1) {
+	   
+		update_bullet(bullet, mario, travel, bullet->facing, 1, dist);
+	   
+	} 
+	
+}
 
 
 void mario_knockdown(struct Sprite* mario, int marioKnock) {
 
-    if (marioKnock > 14) {
-        //knock back mario if hit 14 times
-        if (mario->facing == 1) {
-            mario->x = mario->x + 25;
-        } else {
-            mario->x = mario->x - 25;
-        }
-    }
+	if (marioKnock > 14) {
+		if (mario->facing == 1) {
+			mario->x = mario->x + 25;
+		} else {
+			mario->x = mario->x - 25;
+		}
+	}
 }
 
+int sprite_check_collision(struct Sprite* player, struct Sprite* target) {
+	if (player->x >= target->leftHit - 10 && player->x <= target->rightHit + 10 &&
+		player->y <= target->bottomHit + 10 && player->x >= target->topHit + 10) { return 1; } 
+	return 0;
+}
 
 
 
