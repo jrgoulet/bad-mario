@@ -157,7 +157,7 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 	sprite->counter = 0;		/* set in sprite_set_flip_counter */
 	sprite->yvel = 0;			/* initially not falling */
 	sprite->falling = 0;		/* initially not falling */
-	sprite->animation_delay = 32;/* set in sprite_set_animation_delay */
+	sprite->animation_delay = 16;// 32;/* set in sprite_set_animation_delay */
 	sprite->move = 0;			/* initially not moving */
     sprite->facing = h;         /* for knowing which way sprite is facing */
     sprite->airtime = 0;
@@ -462,24 +462,25 @@ int mario_collide(struct Sprite* bullet, struct Sprite* mario) {
         
         return 1;
     } else {
+        if (bullet->y > mario->topHit && bullet->y < mario->bottomHit) {
+            return 0;
+        }else {
+            return 1;
+        }
         
-        return 0;
     }
 }
 
 
-int update_knockdown(int knockdown) {
+/* assembly functions */
+int stagger(int n); 
+int activeBullet(int n);
 
-    knockdown++;
-    return knockdown;
-}
-
-
+/* update score variable */
 int update_hitCount(int hitCount) {
     
     hitCount++;
     return hitCount;
-
 }
 
 
@@ -489,7 +490,7 @@ void update_bullet(struct Sprite* bullet, struct Sprite* mario, int travel, int 
             bullet->x = bullet->x + travel;
             bullet->distTravel = bullet->distTravel + travel;
         } else { 
-            bullet->bulletActive = 0;
+            bullet->bulletActive = activeBullet(bullet->bulletActive); 
             bullet->x = SCREEN_WIDTH;
             bullet->y = SCREEN_HEIGHT;
             bullet->distTravel = 0;
@@ -499,7 +500,7 @@ void update_bullet(struct Sprite* bullet, struct Sprite* mario, int travel, int 
             bullet->x = bullet->x - travel;
             bullet->distTravel = bullet->distTravel + travel;
         } else { 
-            bullet->bulletActive = 0;
+            bullet->bulletActive = activeBullet(bullet->bulletActive); 
             bullet->distTravel = 0;
             bullet->x = SCREEN_WIDTH;
             bullet->y = SCREEN_HEIGHT;
@@ -524,20 +525,16 @@ void sprite_bullet(struct Sprite* mario,struct Sprite* megaman, struct Sprite* b
 }//end sprite_bullet
 
 
-int mario_knockdown(struct Sprite* mario, int marioKnock) {
+void mario_knockdown(struct Sprite* mario, int marioKnock) {
 
-    if (marioKnock > 10) {
-        //knock back mario if hit 10 times
+    if (marioKnock > 14) {
+        //knock back mario if hit 14 times
         if (mario->facing == 1) {
             mario->x = mario->x + 25;
         } else {
             mario->x = mario->x - 25;
         }
-
-        marioKnock = 0;
-        return marioKnock;
     }
-    return marioKnock;
 }
 
 

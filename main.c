@@ -41,8 +41,8 @@ Spring 2016
 #define BG1_ENABLE 		0x200
 #define BG2_ENABLE		0x400
 
-
-#define SPRITE_MAP_2D 	0x0 		/* flags to set sprite handling in display control register */
+// DONT USE 2D
+//#define SPRITE_MAP_2D 	0x0 		/* flags to set sprite handling in display control register */
 #define SPRITE_MAP_1D 	0x40
 #define SPRITE_ENABLE 	0x1000
 
@@ -175,8 +175,8 @@ void setup_background() {
 
 	/* load the tile data into screen block 16 */
 	memcpy16_dma((unsigned short*) screen_block(16), (unsigned short*) dg_tiles, 32 * 20);
-	memcpy16_dma((unsigned short*) screen_block(24), (unsigned short*) dg_platform, 32 * 21);
-	/* set all control the bits in this register */
+	
+    /* set all control the bits in this register */
 	*bg1_control = 1 |    /* priority, 0 is highest, 3 is lowest */
 	(0 << 2)  |         /*the char block the image data is stored in */
 	(0 << 6)  |         /* the mosaic flag */
@@ -184,12 +184,19 @@ void setup_background() {
 	(24 << 8) |         /* the screen block the tile data is stored in */
 	(1 << 13) |         /* wrapping flag */
 	(0 << 14);          /* bg size, 0 is 256 */
+    
+    /* load other background */  
+    memcpy16_dma((unsigned short*) screen_block(24), (unsigned short*) dg_platform, 32 * 21);
+                 
+            // DELETE THIS BLOCK LATER
+/* 
+load the tile data into screen block 24 
+//memcpy16_dma((unsigned short*) screen_block(24), (unsigned short*) maptrans, maptrans_width * maptrans_height);
 
-	/* load the tile data into screen block 24 */
-	//memcpy16_dma((unsigned short*) screen_block(24), (unsigned short*) maptrans, maptrans_width * maptrans_height);
+load the palette from the image into palette memory
+//memcpy16_dma((unsigned short*) bg_palette, (unsigned short*) t_palette, PALETTE_SIZE);
 
-		/* load the palette from the image into palette memory*/
-		//memcpy16_dma((unsigned short*) bg_palette, (unsigned short*) t_palette, PALETTE_SIZE);
+*/
 
 	/* set all control the bits in this register */
 	*bg2_control = 0 |    /* priority, 0 is highest, 3 is lowest */
@@ -335,7 +342,6 @@ unsigned char button_pressed(unsigned short button) {
 }
 
 /* setup the sprite image and palette */
-//FIGURE OUT HOW TO ADD SECOND SPRITE
 void setup_sprite_image() {
 	/* load the palette from the image into palette memory*/
 	memcpy16_dma((unsigned short*) sprite_palette, (unsigned short*) sprites_palette, PALETTE_SIZE);
@@ -389,10 +395,6 @@ int main( ) {
 	sprites[1] = new_Sprite("Megaman", SIZE_32_32, 100, 120, 1, 0, 384,0);
 	sprite_set_player(sprites[1]);
 
-	//need to draw this off screen, then change x, y to come from the gun
-	
-    // commented for testing new bullet initialization
-    //sprites[2] = new_Sprite("Bullet", SIZE_8_8, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 608, 0);
     
     //number of bullets, 12 because sprite[2] is bullet
     int bullets = 12;
@@ -411,16 +413,11 @@ int main( ) {
 	sprite_collision_init(sprites[0],6, 25, 20, 64,40);
 	sprite_collision_init(sprites[1], 5, 27, 8, 32, 40);
 
-	/* to-do:
-	   marco, mario, bullet animation cycles
-	   sprite_animation_init(sprites[0],128,640,0,128,896,3328,0,0);
-	*/
 
 	/* sprite animations */
 	sprite_set_animation_delay(sprites[1],50);
 	sprite_animation_init(sprites[0], 64, 320, 0, 0, 0, 0, 0, 64);
 	sprite_animation_init(sprites[1], 416, 480, 544, 576, 0, 0, 384, 416); 
-	//sprite_animation_init(sprites[2], 608, 648, 0, 0, 0, 0, 0, 0);
 
 	/*						 *\
 	 * game variables        * =============================================================================
@@ -433,7 +430,7 @@ int main( ) {
 	int xscroll = 0;
 	int sprite_scroll = 0;
 	int bulletTravel = 4;
-    int bulletDist = 120;
+    int bulletDist = 140;
     int fire = 0;
     int has_moved = 0;
     int collide;
@@ -459,9 +456,6 @@ int main( ) {
 	/*						 *\
 	 * title sequence        * =============================================================================
 	\*						 */
-
-	
-
 
 
 	wait_vblank();
@@ -501,6 +495,7 @@ int main( ) {
 			sprite_update(sprites[i],sprite_scroll);
 			sprites_m[i] = sprites[i]->sprite_m;
 	}
+
 	wait_vblank();
 		*bg0_x_scroll = xscroll/2;
 		*bg1_x_scroll = xscroll*2;
@@ -549,7 +544,7 @@ int main( ) {
 
         /* Scoreboard */
         for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
-        score = toChar(marioHitCount);
+//        score = toChar(marioHitCount);
         set_text(score_text, 1, 1);
         set_text_int(marioHitCount,2,1);
 
@@ -597,7 +592,8 @@ int main( ) {
             if (sprites[z]->bulletActive == 0) {
                  tmp = 1;
                  if (sprites[1]->lastFired == 0) {
-                    sprites[z]->bulletActive = 1;
+                    //sets bulletActive with assembly
+                    sprites[z]->bulletActive = activeBullet(sprites[z]->bulletActive); 
                     shoot(sprites[0], sprites[1], sprites[z], bulletTravel,bulletDist);
                     sprites[1]->lastFired = 5;
                  } 
@@ -619,9 +615,11 @@ int main( ) {
                 collide = mario_collide(sprites[z], sprites[0]);               
                 // for collision and knocking mario back when you hit him
                 if(collide == 0) {
-                   //sprite.h 471 -483   
-                   marioKnockback = update_knockdown(marioKnockback); 
+                   
+                   // update score, and knockback variables
+                   marioKnockback = stagger(marioKnockback);   // updates knockback with assembly
                    marioHitCount = update_hitCount(marioHitCount);
+                   mario_knockdown(sprites[0], marioKnockback);
                 }
                 update_bullet(sprites[z], sprites[0], bulletTravel, sprites[z]->facing, collide, bulletDist);
             }   
@@ -631,8 +629,6 @@ int main( ) {
 		/* sprite behavior */							
 		sprite_ai(sprites[0],sprites[1],ai_move,ai_jump);
         
-        //526 sprite.h
-        marioKnockback = mario_knockdown(sprites[0], marioKnockback);
 
 		/* wait for vblank before scrolling and moving sprites */
 		wait_vblank();
