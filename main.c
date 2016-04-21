@@ -377,6 +377,7 @@ int main( ) {
 	int sprite_scroll = 0;
 	int bulletTravel = 2;
     int bulletDist = 120;
+    int fire = 0;
 	/* AI vars */
 	int ai_move = 0;
 	int ai_jump = 0;
@@ -472,6 +473,7 @@ int main( ) {
 	/* loop forever */
 	while (1) {
 
+        fire = 0;
 		/* AI decisions */
 		ai_move = rand() % 100;
 		ai_jump = rand() % 100;
@@ -503,19 +505,25 @@ int main( ) {
 		}
 
         /* shoot */
+        int tmp = 0;
 		if (button_pressed(BUTTON_A)) {
-            int tmp = 0;
+            //int tmp = 0;
+            fire = 1;
             z = 2;
+        }
             
-            while(z <= bullets && tmp == 0) {
-                if (sprites[z]->bulletActive == 0) {
-                    tmp = 1;
+        while(z <= bullets && tmp == 0) {
+            if (sprites[z]->bulletActive == 0) {
+                 tmp = 1;
+                 if (fire == 1) {
                     sprites[z]->bulletActive = 1;
                     shoot(sprites[0], sprites[1], sprites[z], bulletTravel,bulletDist);
-                } 
-                z++;
+                 }
             } 
+            z++;
         }
+             
+       
             
         /* jump */
 		if (button_pressed(BUTTON_UP)) {
