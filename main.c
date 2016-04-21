@@ -26,6 +26,10 @@ Spring 2016
 #include <time.h>
 #include <stdlib.h>
 
+#include "dg_map.h"
+#include "dg_tiles.h"
+#include "dg_platform.h"
+
 /* ====== Global Vars ================================================================================= */
 
 #define SCREEN_WIDTH 	240
@@ -150,11 +154,11 @@ void put_pixel(int row, int col, unsigned short color) {
 void setup_background() {
 
 	/* load the palette from the image into palette memory*/
-	memcpy16_dma((unsigned short*) bg_palette, (unsigned short*) background_palette, PALETTE_SIZE);
+	memcpy16_dma((unsigned short*) bg_palette, (unsigned short*) dg_map_palette, PALETTE_SIZE);
 
 	/* load the image into char block 0 */
-	memcpy16_dma((unsigned short*) char_block(0), (unsigned short*) background_data,
-		(background_width * background_height) / 2);
+	memcpy16_dma((unsigned short*) char_block(0), (unsigned short*) dg_map_data,
+		(80 * 128) / 2);
 
 	memcpy16_dma((unsigned short*) char_block(1), (unsigned short*) text_data,
 		(text_width * text_height) / 2);
@@ -169,8 +173,8 @@ void setup_background() {
 	(0 << 14);        /* bg size, 0 is 256x256 */
 
 	/* load the tile data into screen block 16 */
-	memcpy16_dma((unsigned short*) screen_block(16), (unsigned short*) map, map_width * map_height);
-
+	memcpy16_dma((unsigned short*) screen_block(16), (unsigned short*) dg_tiles, 32 * 20);
+	memcpy16_dma((unsigned short*) screen_block(24), (unsigned short*) dg_platform, 32 * 21);
 	/* set all control the bits in this register */
 	*bg1_control = 1 |    /* priority, 0 is highest, 3 is lowest */
 	(0 << 2)  |         /*the char block the image data is stored in */
@@ -181,7 +185,7 @@ void setup_background() {
 	(0 << 14);          /* bg size, 0 is 256 */
 
 	/* load the tile data into screen block 24 */
-	memcpy16_dma((unsigned short*) screen_block(24), (unsigned short*) maptrans, maptrans_width * maptrans_height);
+	//memcpy16_dma((unsigned short*) screen_block(24), (unsigned short*) maptrans, maptrans_width * maptrans_height);
 
 		/* load the palette from the image into palette memory*/
 		//memcpy16_dma((unsigned short*) bg_palette, (unsigned short*) t_palette, PALETTE_SIZE);
