@@ -86,11 +86,11 @@ void shoot (struct Sprite* mario, struct Sprite* megaman, struct Sprite* bullet,
     bullet->facing = megaman->facing;
     
     if (bullet->facing == 1) {
-        bullet->x = megaman->x;
-        bullet->y = megaman->y + 13;
+        bullet->x = megaman->x + 2;
+        bullet->y = megaman->y + 8;
     } else {
-        bullet->x = megaman->x + 30;
-        bullet->y = megaman->y + 13;
+        bullet->x = megaman->x + 24;
+        bullet->y = megaman->y + 8;
     }
     
     megaman->frame = megaman->atk_start;
