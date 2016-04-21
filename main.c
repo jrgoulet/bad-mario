@@ -26,9 +26,15 @@ Spring 2016
 #include <time.h>
 #include <stdlib.h>
 
+#include "title_01.h"
+#include "title_02.h"
+#include "game_over.h"
+
 #include "dg_map.h"
 #include "dg_tiles.h"
 #include "dg_platform.h"
+
+
 
 /* ====== Global Vars ================================================================================= */
 
@@ -216,7 +222,7 @@ void setup_background1() {
 	/* loop through each column of the screen */
 	for (int row = 0; row < SCREEN_HEIGHT; row++) { 
 			for (int col = 0; col < SCREEN_WIDTH; col++) {
-					put_pixel(row, col, slug_title_data[row * SCREEN_WIDTH + col]);
+					put_pixel(row, col, title_01_data[row * SCREEN_WIDTH + col]);
 			}
 	}
 
@@ -227,7 +233,7 @@ void setup_background2() {
 	/* loop through each column of the screen */
 	for (int row = 0; row < SCREEN_HEIGHT; row++) { 
 			for (int col = 0; col < SCREEN_WIDTH; col++) {
-					put_pixel(row, col, main_bg_data[row * SCREEN_WIDTH + col]);
+					put_pixel(row, col, title_02_data[row * SCREEN_WIDTH + col]);
 			}
 	}
 
@@ -310,8 +316,20 @@ int main( ) {
 
 	/* title display */
 	*display_control = MODE3 | BG2_ENABLE;
-	setup_background1();
-	delay(70000);
+	
+	while (1) {
+		setup_background1();
+		if (button_pressed(BUTTON_A)) break;
+		delay(20000);
+		if (button_pressed(BUTTON_A)) break;
+		delay(20000);
+		if (button_pressed(BUTTON_A)) break;
+		setup_background2();
+		delay(20000);
+		if (button_pressed(BUTTON_A)) break;
+		delay(20000);
+	}
+       
 
 	/* main background */
 	*display_control = MODE0 | BG0_ENABLE | BG1_ENABLE | BG2_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;
@@ -511,8 +529,7 @@ int main( ) {
 				sprite_scroll++;
 			}
 			has_moved = 1;
-		} 
-		
+		} 		
 
          /* shoot */
         int tmp = 0;
@@ -531,15 +548,12 @@ int main( ) {
                  }
             } 
             z++;
-        }
-             
-       
+        }      
             
         /* jump */
 		if (button_pressed(BUTTON_UP)) {
 				jump(sprites[1]);
-		}
-		
+		}	
         
         /* update active bullets, and mario's hitbox */
         sprite_collision_init(sprites[0],6, 25, 20, 64,40);
@@ -552,7 +566,6 @@ int main( ) {
             }   
             z++; 
         }
-
 
 		/* sprite behavior */							
 		sprite_ai(sprites[0],sprites[1],ai_move,ai_jump);
