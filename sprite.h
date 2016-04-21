@@ -3,7 +3,7 @@
 
 #define JUMP_SPEED  5
 #define FALL_SPEED  5
-#define FLOOR       115
+#define FLOOR       99
 #define POSMAX      260
 #define POSMIN      -64
 #define AI_WALKDELAY  10
