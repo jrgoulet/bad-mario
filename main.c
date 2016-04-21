@@ -554,7 +554,9 @@ int main( ) {
             if (sprites[z]->bulletActive == 1) {
 
                 collide = mario_collide(sprites[z], sprites[0]);               
+                // for collision and knocking mario back when you hit him
                 if(collide == 0) {
+                   //sprite.h 471 -483   
                    marioKnockback = update_knockdown(marioKnockback); 
                    marioHitCount = update_hitCount(marioHitCount);
                 }
@@ -566,7 +568,8 @@ int main( ) {
         
 		/* sprite behavior */							
 		sprite_ai(sprites[0],sprites[1],ai_move,ai_jump);
-
+        
+        //526 sprite.h
         marioKnockback = mario_knockdown(sprites[0], marioKnockback);
 
 		/* wait for vblank before scrolling and moving sprites */
