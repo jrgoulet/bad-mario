@@ -65,7 +65,7 @@ struct Sprite {
 
     
     int bulletActive;       /* if bullet is active */     
-    
+    int distTravel;         /* for bullet distance traveled */
 	/* Animation Frames */
 	int frame_interval;
 	int walk_start;
@@ -172,6 +172,7 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
     sprite->topHit = 0;
     sprite->bottomHit = 0;
     sprite->bulletActive = 0;
+    sprite->distTravel = 0;
 
 	/* return a pointer */
 	return sprite;
@@ -486,20 +487,24 @@ int mario_collide(struct Sprite* bullet, struct Sprite* mario) {
     }
 }
 
-void update_bullet(struct Sprite* bullet, struct Sprite* mario, int travel, int dir, int coll) {
+void update_bullet(struct Sprite* bullet, struct Sprite* mario, int travel, int dir, int coll, int dist) {
     if (dir == 0) {
-        if (bullet->x <= SCREEN_WIDTH && coll == 1) {  
+        if (bullet->distTravel <= dist && coll == 1) {  
             bullet->x = bullet->x + travel;
+            bullet->distTravel = bullet->distTravel + travel;
         } else { 
             bullet->bulletActive = 0;
             bullet->x = SCREEN_WIDTH;
             bullet->y = SCREEN_HEIGHT;
+            bullet->distTravel = 0;
         }
     } else if (dir == 1) {
-        if (bullet->x >= 0 && coll == 1) {  
+        if (bullet->distTravel <= dist && coll == 1) {  
             bullet->x = bullet->x - travel;
+            bullet->distTravel = bullet->distTravel + travel;
         } else { 
             bullet->bulletActive = 0;
+            bullet->distTravel = 0;
             bullet->x = SCREEN_WIDTH;
             bullet->y = SCREEN_HEIGHT;
         }
@@ -507,16 +512,16 @@ void update_bullet(struct Sprite* bullet, struct Sprite* mario, int travel, int 
 }
 
 
-void sprite_bullet(struct Sprite* mario,struct Sprite* megaman, struct Sprite* bullet, int travel) {
+void sprite_bullet(struct Sprite* mario,struct Sprite* megaman, struct Sprite* bullet, int travel, int dist) {
     
     // use horizontal flip to see which way bullet is traveling
     if (bullet->bulletActive == 1 && bullet->facing == 0) {
       
-        update_bullet(bullet, mario, travel, bullet->facing, 1);
+        update_bullet(bullet, mario, travel, bullet->facing, 1, dist);
         
     } else if (bullet->bulletActive == 1 && bullet->facing == 1) {
        
-        update_bullet(bullet, mario, travel, bullet->facing, 1);
+        update_bullet(bullet, mario, travel, bullet->facing, 1, dist);
        
     } 
 

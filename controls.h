@@ -85,7 +85,7 @@ void jump(struct Sprite* sprite) {
 
 /* sprite shoot */
 //first is sprite shooting, second is bullet sprite
-void shoot (struct Sprite* mario, struct Sprite* megaman, struct Sprite* bullet, int travel) {
+void shoot (struct Sprite* mario, struct Sprite* megaman, struct Sprite* bullet, int travel, int dist) {
     
     bullet->facing = megaman->facing;
     
@@ -97,7 +97,7 @@ void shoot (struct Sprite* mario, struct Sprite* megaman, struct Sprite* bullet,
         bullet->y = megaman->y + 19;
     }
     
-    sprite_bullet(mario, megaman, bullet, travel);
+    sprite_bullet(mario, megaman, bullet, travel, dist);
  
 }
 

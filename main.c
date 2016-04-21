@@ -372,7 +372,7 @@ int main( ) {
 	int xscroll = 0;
 	int sprite_scroll = 0;
 	int bulletTravel = 2;
-
+    int bulletDist = 120;
 	/* AI vars */
 	int ai_move = 0;
 	int ai_jump = 0;
@@ -502,11 +502,12 @@ int main( ) {
 		if (button_pressed(BUTTON_A)) {
             int tmp = 0;
             z = 2;
+            
             while(z <= bullets && tmp == 0) {
                 if (sprites[z]->bulletActive == 0) {
                     tmp = 1;
                     sprites[z]->bulletActive = 1;
-                    shoot(sprites[0], sprites[1], sprites[z], bulletTravel);
+                    shoot(sprites[0], sprites[1], sprites[z], bulletTravel,bulletDist);
                 } 
                 z++;
             } 
@@ -525,7 +526,7 @@ int main( ) {
             if (sprites[z]->bulletActive == 1) {
 
                 int collide = mario_collide(sprites[z], sprites[0]);                
-                update_bullet(sprites[z], sprites[0], bulletTravel, sprites[z]->facing, collide);
+                update_bullet(sprites[z], sprites[0], bulletTravel, sprites[z]->facing, collide, bulletDist);
             }   
             z++; 
         }
