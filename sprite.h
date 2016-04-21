@@ -3,7 +3,7 @@
 
 #define JUMP_SPEED  5
 #define FALL_SPEED  5
-#define FLOOR       115
+#define FLOOR       99
 #define POSMAX      260
 #define POSMIN      -64
 #define AI_WALKDELAY  10
@@ -127,8 +127,7 @@ struct Sprite_MEM sprite_mem_init (struct Sprite* sprite, int h, int v, enum Spr
 
 	return sprite_m;
 }
-// h = horizontal flip
-// v = vertical flip
+
 
 struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h, int v, int tile_index, int priority) {
 
@@ -160,13 +159,13 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 	sprite->animation_delay = 32;/* set in sprite_set_animation_delay */
 	sprite->move = 0;			/* initially not moving */
     sprite->facing = h;         /* for knowing which way sprite is facing */
-  sprite->airtime = 0;
+    sprite->airtime = 0;
 	sprite->sprite_m = sprite_mem_init(sprite,h,v,size,tile_index,priority);
-  sprite->player = 0;
-  sprite->scroll = 0;
-  sprite->move_timer = 0;
-  sprite->jump_timer = 0;
-  sprite->ymin = FLOOR;
+    sprite->player = 0;
+    sprite->scroll = 0;
+    sprite->move_timer = 0;
+    sprite->jump_timer = 0;
+    sprite->ymin = FLOOR;
     sprite->leftHit = 0;
     sprite->rightHit = 0;
     sprite->topHit = 0;
@@ -178,13 +177,16 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
 	return sprite;
 }
 
+
 void sprite_set_animation_delay(struct Sprite* sprite, int delay) {
 	sprite->animation_delay = delay;
 }
 
+
 void sprite_set_player(struct Sprite* sprite) {
   sprite->player = 1;
 }
+
 
 void sprite_set_pos(struct Sprite* sprite, int x, int y) {
   sprite->x = x;
@@ -204,9 +206,11 @@ void sprite_set_pos(struct Sprite* sprite, int x, int y) {
 
 }
 
+
 void sprite_set_flip_counter(struct Sprite* sprite, int count) {
 	sprite->counter = count;
 }
+
 
 void sprite_collision_init(struct Sprite* sprite, int l, int r, int u, int d, int b) {
 	sprite->leftHit = sprite->x + l;
@@ -215,6 +219,7 @@ void sprite_collision_init(struct Sprite* sprite, int l, int r, int u, int d, in
 	sprite->bottomHit = sprite->y + d;
 	sprite->border = b;
 }
+
 
 void sprite_animation_init(struct Sprite* sprite, int ws, int we, int as, int ae, int ds, int de, int ss, int se) {
 	sprite->walk_start = ws;
@@ -293,42 +298,11 @@ void sprite_set_offset(struct Sprite* sprite, int offset) {
   sprite->sprite_m.attribute2 |= (offset & 0x03ff);
 }
 
-/* finds which tile a screen coordinate maps to, taking scroll into account */
-unsigned short tile_lookup(int x, int y, int xscroll, int yscroll,
-        const unsigned short* tilemap, int tilemap_w, int tilemap_h) {
-
-    /* adjust for the scroll */
-    x += xscroll;
-    y += yscroll;
-
-    /* convert from screen coordinates to tile coordinates */
-    x >>= 3;
-    y >>= 3;
-
-    /* account for wraparound */
-    while (x >= tilemap_w) {
-        x -= tilemap_w;
-    }
-    while (y >= tilemap_h) {
-        y -= tilemap_h;
-    }
-    while (x < 0) {
-        x += tilemap_w;
-    }
-    while (y < 0) {
-        y += tilemap_h;
-    }
-
-    /* lookup this tile from the map */
-    int index = y * tilemap_w + x;
-
-    /* return the tile */
-    return tilemap[index];
-}
 
 void sprite_set_floor(struct Sprite* sprite, int y) {
   sprite->ymin = y;
 }
+
 
 void sprite_update(struct Sprite* sprite, int xscroll) {
 
@@ -382,8 +356,9 @@ void sprite_update(struct Sprite* sprite, int xscroll) {
     }
     */
     /* set on screen position */
-    sprite_position(sprite/*, sprite->x, sprite->y*/);
+    sprite_position(sprite);
 }
+
 
 int sprite_move_right(struct Sprite* sprite) {
   /* face right */
@@ -400,11 +375,11 @@ int sprite_move_right(struct Sprite* sprite) {
     sprite_set_offset(sprite, sprite->frame);
     sprite->counter = 0;
 
-
-    sprite->x++; //added for jumping and falling
-    sprite_position(sprite/*, sprite->x, sprite->y*/);
+    sprite->x++; 
+    sprite_position(sprite);
     return 0;
 }
+
 
 int sprite_move_left(struct Sprite* sprite) {
   /* face right */
@@ -421,11 +396,11 @@ int sprite_move_left(struct Sprite* sprite) {
     sprite_set_offset(sprite, sprite->frame);
     sprite->counter = 0;
 
-
-    sprite->x--; //added for jumping and falling
-    sprite_position(sprite/*, sprite->x, sprite->y*/);
+    sprite->x--; 
+    sprite_position(sprite);
     return 0;
 }
+
 
 void sprite_move_none(struct Sprite* sprite) {
   sprite->move = sprite->stand_start;
@@ -434,11 +409,13 @@ void sprite_move_none(struct Sprite* sprite) {
   sprite_set_offset(sprite, sprite->frame);
 }
 
+
 void sprite_jump(struct Sprite* sprite) {
   if (sprite->airtime == 0 && sprite->falling == 0) {
       sprite->airtime = 20;
   }
 }
+
 
 void sprite_ai(struct Sprite* com, struct Sprite* player, int move, int jump) {
 
@@ -478,15 +455,16 @@ void sprite_ai(struct Sprite* com, struct Sprite* player, int move, int jump) {
 int mario_collide(struct Sprite* bullet, struct Sprite* mario) {
 
     if (bullet->x <= mario->leftHit) { 
-        // && (bullet->y >= mario->topHit && bullet->y <= mario->bottomHit)) {
+        
         return 1;    
     } else if (bullet->x >= mario->rightHit) { 
-        // && (bullet->y >= mario->topHit && bullet->y <= mario->bottomHit)){
+        
         return 1;
     } else {
         return 0;
     }
 }
+
 
 void update_bullet(struct Sprite* bullet, struct Sprite* mario, int travel, int dir, int coll, int dist) {
     if (dir == 0) {
