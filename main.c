@@ -380,17 +380,19 @@ int main( ) {
     int fire = 0;
     int has_moved = 0;
     int has_jumped = 0;
+    //int collide;
 
 	/* AI vars */
 	int ai_move = 0;
 	int ai_jump = 0;
-
+    //int marioHitCount = 0;
+    //int marioKnockback = 0;
 	int shot_fired = 0;
 	int start_counter = 200;
 	int title_counter = 200;
 	int clear = 0;
 	int atk_timer = 0;
-	int tmp = 0;
+	int tmp = 0;    //exits while loop for finding inactive bullet
 
 	sprite_set_pos(sprites[0],-64,90);
 	sprite_set_pos(sprites[1],-64,115);
@@ -478,12 +480,12 @@ int main( ) {
 
 	/* loop forever */
 	while (1) {
-
-        fire = 0;
+        //collide = 1;
+        
         shot_fired = 0;
         has_moved = 0;
         has_jumped = 0;
-
+        tmp = 0;  //for shooting
 		/* AI decisions */
 		ai_move = rand() % 100;
 		ai_jump = rand() % 100;
@@ -515,20 +517,24 @@ int main( ) {
 		
 
          /* shoot */
-        int tmp = 0;
+        
 		if (button_pressed(BUTTON_A)) {
-            //int tmp = 0;
-            fire = 1;
+            //delays shooting 
+            if (sprites[1]->lastFired > 0) {
+                sprites[1]->lastFired -= 1;
+            }
+            //sprites position array for bullet            
             z = 2;
         }
             
         while(z <= bullets && tmp == 0) {
             if (sprites[z]->bulletActive == 0) {
                  tmp = 1;
-                 if (fire == 1) {
+                 if (sprites[1]->lastFired == 0) {
                     sprites[z]->bulletActive = 1;
                     shoot(sprites[0], sprites[1], sprites[z], bulletTravel,bulletDist);
-                 }
+                    sprites[1]->lastFired = 5;
+                 } 
             } 
             z++;
         }
@@ -547,15 +553,21 @@ int main( ) {
         while (z <= bullets) {
             if (sprites[z]->bulletActive == 1) {
 
-                int collide = mario_collide(sprites[z], sprites[0]);                
+                int collide = mario_collide(sprites[z], sprites[0]);               
+              //  if(collide == 0) {
+              //     marioKnockback = update_knockdown(marioKnockback); 
+              //     marioHitCount = update_hitCount(marioHitCount);
+              //  }
                 update_bullet(sprites[z], sprites[0], bulletTravel, sprites[z]->facing, collide, bulletDist);
             }   
             z++; 
         }
 
-
+        
 		/* sprite behavior */							
 		sprite_ai(sprites[0],sprites[1],ai_move,ai_jump);
+
+        //marioKnockback = mario_knockdown(sprites[0], marioKnockback);
 
 		/* wait for vblank before scrolling and moving sprites */
 		wait_vblank();

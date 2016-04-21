@@ -66,7 +66,8 @@ struct Sprite {
     
     int bulletActive;       /* if bullet is active */     
     int distTravel;         /* for bullet distance traveled */
-	/* Animation Frames */
+	int lastFired;
+    /* Animation Frames */
 	int frame_interval;
 	int walk_start;
 	int walk_end;
@@ -172,7 +173,7 @@ struct Sprite* new_Sprite(char* name, enum SpriteSize size, int x, int y, int h,
     sprite->bottomHit = 0;
     sprite->bulletActive = 0;
     sprite->distTravel = 0;
-
+    sprite->lastFired = 0;
 	/* return a pointer */
 	return sprite;
 }
@@ -233,7 +234,7 @@ void sprite_animation_init(struct Sprite* sprite, int ws, int we, int as, int ae
 }
 
 /* set a sprite postion */
-void sprite_position(struct Sprite* sprite/*, int x, int y*/) {
+void sprite_position(struct Sprite* sprite) {
  
   int x = sprite->x;
   int y = sprite->y;
@@ -461,10 +462,26 @@ int mario_collide(struct Sprite* bullet, struct Sprite* mario) {
         
         return 1;
     } else {
+        
         return 0;
     }
 }
 
+/*
+int update_knockdown(int knockdown) {
+
+    knockdown++;
+    return knockdown;
+}
+
+
+int update_hitCount(int hitCount) {
+    
+    hitCount++;
+    return hitCount;
+
+}
+*/
 
 void update_bullet(struct Sprite* bullet, struct Sprite* mario, int travel, int dir, int coll, int dist) {
     if (dir == 0) {
@@ -503,8 +520,27 @@ void sprite_bullet(struct Sprite* mario,struct Sprite* megaman, struct Sprite* b
         update_bullet(bullet, mario, travel, bullet->facing, 1, dist);
        
     } 
-
+    
 }//end sprite_bullet
+
+/*
+int mario_knockdown(struct Sprite* mario, int marioKnock) {
+
+    if (marioKnock > 10) {
+        //knock back mario if hit 10 times
+        if (mario->facing == 1) {
+            mario->x = mario->x - 20;
+        } else {
+            mario->x = mario->x + 20;
+        }
+
+        marioKnock = 0;
+        return marioKnock;
+    }
+    return marioKnock;
+}
+*/
+
 
 
 

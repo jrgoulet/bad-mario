@@ -82,22 +82,21 @@ void jump(struct Sprite* sprite) {
 
 /* sprite shoot */
 void shoot (struct Sprite* mario, struct Sprite* megaman, struct Sprite* bullet, int travel, int dist) {
-    
+   
     bullet->facing = megaman->facing;
     
     if (bullet->facing == 1) {
         bullet->x = megaman->x;
-        bullet->y = megaman->y + 40;
+        bullet->y = megaman->y + 13;
     } else {
         bullet->x = megaman->x + 30;
-        bullet->y = megaman->y + 40;
+        bullet->y = megaman->y + 13;
     }
     
     megaman->frame = megaman->atk_start;
     sprite_set_offset(megaman, megaman->frame);
 
     sprite_bullet(mario, megaman, bullet, travel, dist);
- 
 }
 
 
