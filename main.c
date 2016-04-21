@@ -1,10 +1,10 @@
 /*
-███████╗██╗     ██╗   ██╗ ██████╗ 
-██╔════╝██║     ██║   ██║██╔════╝ 
-███████╗██║     ██║   ██║██║  ███╗
-╚════██║██║     ██║   ██║██║   ██║
-███████║███████╗╚██████╔╝╚██████╔╝
-╚══════╝╚══════╝ ╚═════╝  ╚═════╝ 
+██████╗  █████╗ ██████╗     ███╗   ███╗ █████╗ ██████╗ ██╗ ██████╗ 
+██╔══██╗██╔══██╗██╔══██╗    ████╗ ████║██╔══██╗██╔══██╗██║██╔═══██╗
+██████╔╝███████║██║  ██║    ██╔████╔██║███████║██████╔╝██║██║   ██║
+██╔══██╗██╔══██║██║  ██║    ██║╚██╔╝██║██╔══██║██╔══██╗██║██║   ██║
+██████╔╝██║  ██║██████╔╝    ██║ ╚═╝ ██║██║  ██║██║  ██║██║╚██████╔╝
+╚═════╝ ╚═╝  ╚═╝╚═════╝     ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝ ╚═════╝ 
 Kenny Lyon and Joe Goulet
 CPSC 305 01 - Finlayson
 Spring 2016
@@ -14,17 +14,14 @@ Spring 2016
 
 /* ====== Header Files ================================================================================ */
 
-#include "background.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "sprites.h"
 #include "controls.h"
 #include "sprite.h"
-#include "map.h"
-#include "maptrans.h"
 #include "text.h"
-#include "slug_title.h"
-#include "main_bg.h"
-#include <time.h>
-#include <stdlib.h>
 
 #include "title_01.h"
 #include "title_02.h"
@@ -33,8 +30,6 @@ Spring 2016
 #include "dg_map.h"
 #include "dg_tiles.h"
 #include "dg_platform.h"
-
-
 
 /* ====== Global Vars ================================================================================= */
 
@@ -262,6 +257,48 @@ void set_text(char* str, int row, int col) {
 		}   
 }
 
+/* function to set text on the screen at a given location */
+void set_text_int(int num, int row, int col) {    
+
+		/* count number of digits */
+		int digit = 0; 
+		int n = num;
+
+		while (n != 0) {
+		    n /= 10;
+		    digit++;
+		}
+
+		char n_str[digit];
+		digit = 0;    
+		n = num;
+
+		/* extract each digit */
+		while (n != 0) {
+		    n_str[digit] = '0' + (n % 10);
+		    n /= 10;
+		    digit++;
+		}
+
+
+		/* find the index in the texmap to draw to */
+		int index = row * 32 + col;
+
+		/* the first 32 characters are missing from the map (controls etc.) */
+		int missing = 32; 
+
+		/* pointer to text map */
+		volatile unsigned short* ptr = screen_block(28);
+
+		/* for each character */
+		for (int i = digit-1; i >= 0; i--) {
+				/* place this character in the map */
+				ptr[index] = n_str[i] - missing;
+				index++;
+		}   
+}
+
+
 /* just kill time */
 void delay(unsigned int amount) {
 	for (int i = 0; i < amount * 10; i++);
@@ -307,7 +344,12 @@ void setup_sprite_image() {
 	memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) sprites_data, (sprites_width * sprites_height) / 2);
 }
 
-
+int exit_title() {
+	for (int i = 0; i < 80000; i++) {
+		if (button_pressed(BUTTON_A)) return 1;
+	}
+	return 0;
+}
 
 
 /* ====== Main ========================================================================================= */
@@ -318,16 +360,12 @@ int main( ) {
 	*display_control = MODE3 | BG2_ENABLE;
 	
 	while (1) {
+		wait_vblank();
 		setup_background1();
-		if (button_pressed(BUTTON_A)) break;
-		delay(20000);
-		if (button_pressed(BUTTON_A)) break;
-		delay(20000);
-		if (button_pressed(BUTTON_A)) break;
+		if (exit_title()) break;
+		wait_vblank();
 		setup_background2();
-		delay(20000);
-		if (button_pressed(BUTTON_A)) break;
-		delay(20000);
+		if (exit_title()) break;
 	}
        
 
@@ -345,7 +383,7 @@ int main( ) {
 	 * sprite initialization * =============================================================================
 	\*						 */
 
-	sprites[0] = new_Sprite("Mario", SIZE_32_64, 200, 88, 0, 0, 0, 0);
+	sprites[0] = new_Sprite("Mario", SIZE_32_64, 200, 69, 0, 0, 0, 0);
 	sprite_set_floor(sprites[0],69);
 
 	sprites[1] = new_Sprite("Megaman", SIZE_32_32, 100, 120, 1, 0, 384,0);
@@ -379,6 +417,7 @@ int main( ) {
 	*/
 
 	/* sprite animations */
+	sprite_set_animation_delay(sprites[1],50);
 	sprite_animation_init(sprites[0], 64, 320, 0, 0, 0, 0, 0, 64);
 	sprite_animation_init(sprites[1], 416, 480, 544, 576, 0, 0, 384, 416); 
 	//sprite_animation_init(sprites[2], 608, 648, 0, 0, 0, 0, 0, 0);
@@ -397,13 +436,12 @@ int main( ) {
     int bulletDist = 120;
     int fire = 0;
     int has_moved = 0;
-    int has_jumped = 0;
     int collide;
 
 	/* AI vars */
 	int ai_move = 0;
 	int ai_jump = 0;
-    int marioHitCount = 0;
+    int marioHitCount = 1;
     int marioKnockback = 0;
 	int shot_fired = 0;
 	int start_counter = 200;
@@ -412,12 +450,37 @@ int main( ) {
 	int atk_timer = 0;
 	int tmp = 0;    //exits while loop for finding inactive bullet
 
-	sprite_set_pos(sprites[0],-64,90);
+	sprite_set_pos(sprites[0],-64,74);
 	sprite_set_pos(sprites[1],-64,115);
+
+	char score_text [5] = "Score";
+	char* score = "0";
 
 	/*						 *\
 	 * title sequence        * =============================================================================
 	\*						 */
+
+	
+
+
+
+	wait_vblank();
+	sprite_update_all();
+
+	delay(100000);
+	for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
+
+	char msg_02 [32]  = "You're in danger.";
+	set_text(msg_02, 13, 7); 
+
+	delay(200000);
+	for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
+
+	char msg_03 [32] = "Don't let Mario touch you...";
+	set_text(msg_03, 13, 1); 
+
+	delay(200000);
+	for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
 
 	while (sprites[0]->x < SCREEN_WIDTH/2 - 20) {    
 		sprite_move_right(sprites[0]);
@@ -433,40 +496,22 @@ int main( ) {
 		delay(800);
 	}
 
-	delay(10000);
-
 	sprite_move_none(sprites[0]);
 	for (int i = 0; i < NUM_SPRITES; i++) {
 			sprite_update(sprites[i],sprite_scroll);
 			sprites_m[i] = sprites[i]->sprite_m;
 	}
-
 	wait_vblank();
-	sprite_update_all();
+		*bg0_x_scroll = xscroll/2;
+		*bg1_x_scroll = xscroll*2;
+		sprite_update_all();
+		delay(10000);
+	char msg_04 [32] = "I'm gonna";
+	set_text(msg_04, 13, 16); 
+	char msg_05 [32] = "get you!";
+	set_text(msg_05, 14, 16); 
 
-	char msg_01 [32] = "Mario is mad.";
-	set_text(msg_01, 6, 6); 
-
-	delay(100000);
-	for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
-
-	char msg_02 [32]  = "You're in danger.";
-	set_text(msg_02, 6, 6); 
-
-	delay(100000);
-	for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
-
-  
-	char msg_03 [32] = "There is no escape.";
-	set_text(msg_03, 6, 6); 
-
-	delay(100000);
-	for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
-
-	char msg_04 [32] = "Try to survive.";
-	set_text(msg_04, 6, 6); 
-
-	delay(100000);
+	delay(50000);
 	for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
 
 	sprites[0]->falling = 1;
@@ -490,8 +535,6 @@ int main( ) {
 		delay(800);
 	}
 
-    
-
 	/*						 *\
 	 * main sequence         * =============================================================================
 	\*						 */
@@ -502,8 +545,14 @@ int main( ) {
         
         shot_fired = 0;
         has_moved = 0;
-        has_jumped = 0;
         tmp = 0;  //for shooting
+
+        /* Scoreboard */
+        for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
+        score = toChar(marioHitCount);
+        set_text(score_text, 1, 1);
+        set_text_int(marioHitCount,2,1);
+
 		/* AI decisions */
 		ai_move = rand() % 100;
 		ai_jump = rand() % 100;
