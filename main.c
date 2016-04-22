@@ -41,8 +41,6 @@ Spring 2016
 #define BG1_ENABLE 		0x200
 #define BG2_ENABLE		0x400
 
-// DONT USE 2D
-//#define SPRITE_MAP_2D 	0x0 		/* flags to set sprite handling in display control register */
 #define SPRITE_MAP_1D 	0x40
 #define SPRITE_ENABLE 	0x1000
 
@@ -188,16 +186,6 @@ void setup_background() {
     /* load other background */  
     memcpy16_dma((unsigned short*) screen_block(24), (unsigned short*) dg_platform, 32 * 21);
                  
-            // DELETE THIS BLOCK LATER
-/* 
-load the tile data into screen block 24 
-//memcpy16_dma((unsigned short*) screen_block(24), (unsigned short*) maptrans, maptrans_width * maptrans_height);
-
-load the palette from the image into palette memory
-//memcpy16_dma((unsigned short*) bg_palette, (unsigned short*) t_palette, PALETTE_SIZE);
-
-*/
-
 	/* set all control the bits in this register */
 	*bg2_control = 0 |    /* priority, 0 is highest, 3 is lowest */
 	(1 << 2)  |         /*the char block the image data is stored in */
@@ -441,7 +429,6 @@ int main( ) {
 	int sprite_scroll = 0;
 	int bulletTravel = 4;
     int bulletDist = 140;
-    int fire = 0;
     int has_moved = 0;
     int collide;
     int game_over_flag = 0;
@@ -449,14 +436,13 @@ int main( ) {
 	/* AI vars */
 	int ai_move = 0;
 	int ai_jump = 0;
-    int marioHitCount = 1;
+    int marioHitCount = 0;
     int marioKnockback = 0;
-	int shot_fired = 0;
 	int start_counter = 200;
 	int title_counter = 200;
 	int clear = 0;
 	int atk_timer = 0;
-	int tmp = 0;    //exits while loop for finding inactive bullet
+	int exit_loop = 0;    //exits while loop for finding inactive bullet
 
 	sprite_set_pos(sprites[0],-64,74);
 	sprite_set_pos(sprites[1],-64,115);
@@ -549,10 +535,8 @@ int main( ) {
 	/* loop forever */
 	while (1) {
         collide = 1;
-        
-        shot_fired = 0;
         has_moved = 0;
-        tmp = 0;  //for shooting
+        exit_loop = 0;  //for leaving shooting loop
 
         /* Scoreboard */
         for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
@@ -606,9 +590,9 @@ int main( ) {
             z = 2;
         }
             
-        while(z <= bullets && tmp == 0) {
+        while(z <= bullets && exit_loop == 0) {
             if (sprites[z]->bulletActive == 0) {
-                 tmp = 1;
+                 exit_loop = 1;
                  if (sprites[1]->lastFired == 0) {
                     //sets bulletActive with assembly
                     sprites[z]->bulletActive = activeBullet(sprites[z]->bulletActive); 

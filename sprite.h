@@ -53,7 +53,6 @@ struct Sprite {
 	int move; 				/* boolean, whether moving or not */
 	int border; 			/* pixel distance from edge of screen */
 	int falling; 			/* boolean, whether falling or not */
-<<<<<<< HEAD
 	int facing;             /* which way sprite is facing */
     char* name; 		    /* callsign */
     
@@ -68,24 +67,8 @@ struct Sprite {
     int bulletActive;       /* if bullet is active */     
     int distTravel;         /* for bullet distance traveled */
 	int lastFired;          /* for slowing down shooting speed */
-    /* Animation Frames */
-=======
-	int facing;       /* which way sprite is facing */
-	char* name; 		/* callsign */
 	
-	int airtime;
-	int player;
-	int scroll;
-	int move_timer;
-	int jump_timer;
-	int ymin;
-
-	
-	int bulletActive;       /* if bullet is active */     
-	int distTravel;         /* for bullet distance traveled */
-	int lastFired;
 	/* Animation Frames */
->>>>>>> 4c25c513fd44b5a5837fb1b4d8e818e530e7048f
 	int frame_interval;
 	int walk_start;
 	int walk_end;
@@ -325,7 +308,6 @@ void sprite_set_floor(struct Sprite* sprite, int y) {
 
 void sprite_update(struct Sprite* sprite, int xscroll) {
 
-<<<<<<< HEAD
     xscroll = xscroll * 2;
 
     /* update y position and speed if falling */
@@ -368,11 +350,10 @@ void sprite_update(struct Sprite* sprite, int xscroll) {
     }
     /* set on screen position */
     sprite_position(sprite);
-=======
-	xscroll = xscroll * 2;
+//	xscroll = xscroll * 2;
 
 	/* update y position and speed if falling */
-	if (sprite->airtime == 1) {
+/*	if (sprite->airtime == 1) {
 	  sprite->airtime = 0;
 	  sprite->falling = 1;
 	}
@@ -409,10 +390,9 @@ void sprite_update(struct Sprite* sprite, int xscroll) {
 	if (sprite->scroll < 0 && xscroll > 0) {
 	  sprite->scroll += xscroll;
 	}
-
+*/
 	/* set on screen position */
-	sprite_position(sprite);
->>>>>>> 4c25c513fd44b5a5837fb1b4d8e818e530e7048f
+//	sprite_position(sprite);
 }
 
 
