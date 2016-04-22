@@ -8,7 +8,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "map.h"
 #include "controls.h"
 
 enum SpriteSize {
