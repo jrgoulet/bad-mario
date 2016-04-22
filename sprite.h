@@ -53,8 +53,8 @@ struct Sprite {
 	int move; 				/* boolean, whether moving or not */
 	int border; 			/* pixel distance from edge of screen */
 	int falling; 			/* boolean, whether falling or not */
-	int facing;       /* which way sprite is facing */
-    char* name; 		/* callsign */
+	int facing;             /* which way sprite is facing */
+    char* name; 		    /* callsign */
     
     int airtime;
     int player;
@@ -66,7 +66,7 @@ struct Sprite {
     
     int bulletActive;       /* if bullet is active */     
     int distTravel;         /* for bullet distance traveled */
-	int lastFired;
+	int lastFired;          /* for slowing down shooting speed */
     /* Animation Frames */
 	int frame_interval;
 	int walk_start;
@@ -347,15 +347,6 @@ void sprite_update(struct Sprite* sprite, int xscroll) {
     if (sprite->scroll < 0 && xscroll > 0) {
       sprite->scroll += xscroll;
     }
-    /*
-    if (sprite->scroll > 0) {
-      sprite->x = POSMAX;
-    }
-
-    if (sprite->scroll < 0) {
-      sprite->x = POSMIN;
-    }
-    */
     /* set on screen position */
     sprite_position(sprite);
 }
