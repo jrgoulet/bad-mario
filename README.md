@@ -14,9 +14,13 @@
 ### Default Controls
 
 **Z** - Shoot / Start
+
 **Up-Arrow** - Jump
+
 **L-Arrow** - Move Left
+
 **R-Arrow** - Move Right
+
 **X** - Exit Game (Continue Screen)
 
 
