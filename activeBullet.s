@@ -7,15 +7,14 @@
 .global activeBullet
 activeBullet:
     @variables
-    mov r3, #1
+    mov r1, #1
 .top:
     @compare value so we know if to change it
-    cmp r0, #1
-    beq .odd
-    add r0, r0, r3
+    cmp r0, r1
+    beq .isone
+    add r0, r0, r1
     b .done
-.odd:
-    sub r0, r0, r3
-    b .done
+.isone:
+    sub r0, r0, r1
 .done:
     mov pc, lr
