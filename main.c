@@ -41,8 +41,7 @@ Spring 2016
 #define BG1_ENABLE 		0x200
 #define BG2_ENABLE		0x400
 
-// DONT USE 2D
-//#define SPRITE_MAP_2D 	0x0 		/* flags to set sprite handling in display control register */
+#define SPRITE_MAP_2D 	0x0 		/* flags to set sprite handling in display control register */
 #define SPRITE_MAP_1D 	0x40
 #define SPRITE_ENABLE 	0x1000
 
@@ -68,10 +67,8 @@ Spring 2016
 
 /* ====== Declarations ================================================================================ */
 
-struct Sprite* Marco;
 struct Sprite_MEM sprites_m[NUM_SPRITES];
 struct Sprite* sprites[NUM_SPRITES];
-
 
 /* ====== Control Registers =========================================================================== */
 
@@ -161,24 +158,25 @@ void setup_background() {
 	memcpy16_dma((unsigned short*) char_block(0), (unsigned short*) dg_map_data,
 		(80 * 128) / 2);
 
+	/* load text int char block 1 */
 	memcpy16_dma((unsigned short*) char_block(1), (unsigned short*) text_data,
 		(text_width * text_height) / 2);
 
 	/* set all control the bits in this register */
-	*bg0_control = 2 |    /* priority, 0 is highest, 3 is lowest */
-	(0 << 2)  |       /* the char block the image data is stored in */
-	(0 << 6)  |       /* the mosaic flag */
-	(1 << 7)  |       /* color mode, 0 is 16 colors, 1 is 256 colors */
-	(16 << 8) |       /* the screen block the tile data is stored in */
-	(1 << 13) |       /* wrapping flag */
-	(0 << 14);        /* bg size, 0 is 256x256 */
+	*bg0_control = 2 |  /* priority, 0 is highest, 3 is lowest */
+	(0 << 2)  |       	/* the char block the image data is stored in */
+	(0 << 6)  |       	/* the mosaic flag */
+	(1 << 7)  |       	/* color mode, 0 is 16 colors, 1 is 256 colors */
+	(16 << 8) |       	/* the screen block the tile data is stored in */
+	(1 << 13) |       	/* wrapping flag */
+	(0 << 14);        	/* bg size, 0 is 256x256 */
 
 	/* load the tile data into screen block 16 */
 	memcpy16_dma((unsigned short*) screen_block(16), (unsigned short*) dg_tiles, 32 * 20);
 	
     /* set all control the bits in this register */
-	*bg1_control = 1 |    /* priority, 0 is highest, 3 is lowest */
-	(0 << 2)  |         /*the char block the image data is stored in */
+	*bg1_control = 1 |	/* priority, 0 is highest, 3 is lowest */
+	(0 << 2)  |         /* the char block the image data is stored in */
 	(0 << 6)  |         /* the mosaic flag */
 	(1 << 7)  |         /* color mode, 0 is 16 colors, 1 is 256 colors */
 	(24 << 8) |         /* the screen block the tile data is stored in */
@@ -187,16 +185,6 @@ void setup_background() {
     
     /* load other background */  
     memcpy16_dma((unsigned short*) screen_block(24), (unsigned short*) dg_platform, 32 * 21);
-                 
-            // DELETE THIS BLOCK LATER
-/* 
-load the tile data into screen block 24 
-//memcpy16_dma((unsigned short*) screen_block(24), (unsigned short*) maptrans, maptrans_width * maptrans_height);
-
-load the palette from the image into palette memory
-//memcpy16_dma((unsigned short*) bg_palette, (unsigned short*) t_palette, PALETTE_SIZE);
-
-*/
 
 	/* set all control the bits in this register */
 	*bg2_control = 0 |    /* priority, 0 is highest, 3 is lowest */
@@ -206,7 +194,6 @@ load the palette from the image into palette memory
 	(28 << 8) |         /* the screen block the tile data is stored in */
 	(1 << 13) |         /* wrapping flag */
 	(0 << 14);          /* bg size, 0 is 256 */
-
 
 	/* clear the tile map in screen block 25 to all black tile*/
 		volatile unsigned short* ptr = screen_block(28);
@@ -219,35 +206,38 @@ load the palette from the image into palette memory
 
 }
 
+/* start sequence */
 void setup_background1() {
 
 	/* loop through each column of the screen */
 	for (int row = 0; row < SCREEN_HEIGHT; row++) { 
-			for (int col = 0; col < SCREEN_WIDTH; col++) {
-					put_pixel(row, col, title_01_data[row * SCREEN_WIDTH + col]);
-			}
+		for (int col = 0; col < SCREEN_WIDTH; col++) {
+			put_pixel(row, col, title_01_data[row * SCREEN_WIDTH + col]);
+		}
 	}
 
 }
 
+/* start sequence */
 void setup_background2() {
 
 	/* loop through each column of the screen */
 	for (int row = 0; row < SCREEN_HEIGHT; row++) { 
-			for (int col = 0; col < SCREEN_WIDTH; col++) {
-					put_pixel(row, col, title_02_data[row * SCREEN_WIDTH + col]);
-			}
+		for (int col = 0; col < SCREEN_WIDTH; col++) {
+			put_pixel(row, col, title_02_data[row * SCREEN_WIDTH + col]);
+		}
 	}
 
 }
 
+/* game over */
 void setup_background3() {
 
 	/* loop through each column of the screen */
 	for (int row = 0; row < SCREEN_HEIGHT; row++) { 
-			for (int col = 0; col < SCREEN_WIDTH; col++) {
-					put_pixel(row, col, game_over_data[row * SCREEN_WIDTH + col]);
-			}
+		for (int col = 0; col < SCREEN_WIDTH; col++) {
+			put_pixel(row, col, game_over_data[row * SCREEN_WIDTH + col]);
+		}
 	}
 
 }
@@ -277,42 +267,41 @@ void set_text(char* str, int row, int col) {
 /* function to set text on the screen at a given location */
 void set_text_int(int num, int row, int col) {    
 
-		/* count number of digits */
-		int digit = 0; 
-		int n = num;
+	/* count number of digits */
+	int digit = 0; 
+	int n = num;
 
-		while (n != 0) {
-		    n /= 10;
-		    digit++;
-		}
+	while (n != 0) {
+	    n /= 10;
+	    digit++;
+	}
 
-		char n_str[digit];
-		digit = 0;    
-		n = num;
+	char n_str[digit];
+	digit = 0;    
+	n = num;
 
-		/* extract each digit */
-		while (n != 0) {
-		    n_str[digit] = '0' + (n % 10);
-		    n /= 10;
-		    digit++;
-		}
+	/* extract each digit */
+	while (n != 0) {
+	    n_str[digit] = '0' + (n % 10);
+	    n /= 10;
+	    digit++;
+	}
 
+	/* find the index in the text map to draw to */
+	int index = row * 32 + col;
 
-		/* find the index in the texmap to draw to */
-		int index = row * 32 + col;
+	/* the first 32 characters are missing from the map (controls etc.) */
+	int missing = 32; 
 
-		/* the first 32 characters are missing from the map (controls etc.) */
-		int missing = 32; 
+	/* pointer to text map */
+	volatile unsigned short* ptr = screen_block(28);
 
-		/* pointer to text map */
-		volatile unsigned short* ptr = screen_block(28);
-
-		/* for each character */
-		for (int i = digit-1; i >= 0; i--) {
-				/* place this character in the map */
-				ptr[index] = n_str[i] - missing;
-				index++;
-		}   
+	/* for each character */
+	for (int i = digit-1; i >= 0; i--) {
+		/* place this character in the map */
+		ptr[index] = n_str[i] - missing;
+		index++;
+	}   
 }
 
 
@@ -360,6 +349,7 @@ void setup_sprite_image() {
 	memcpy16_dma((unsigned short*) sprite_image_memory, (unsigned short*) sprites_data, (sprites_width * sprites_height) / 2);
 }
 
+/* prevents delay when pressing start button */
 int exit_title() {
 	for (int i = 0; i < 80000; i++) {
 		if (button_pressed(BUTTON_A)) return 1;
@@ -370,11 +360,12 @@ int exit_title() {
 
 /* ====== Main ========================================================================================= */
 
-int main( ) {
+int main() {
 
 	/* title display */
 	*display_control = MODE3 | BG2_ENABLE;
 	
+	/* flashing start screen */
 	while (1) {
 		wait_vblank();
 		setup_background1();
@@ -384,8 +375,7 @@ int main( ) {
 		if (exit_title()) break;
 	}
        
-
-	/* main background */
+	/* setup main background */
 	*display_control = MODE0 | BG0_ENABLE | BG1_ENABLE | BG2_ENABLE | SPRITE_ENABLE | SPRITE_MAP_1D;
 	setup_background();
 
@@ -399,30 +389,27 @@ int main( ) {
 	 * sprite initialization * =============================================================================
 	\*						 */
 
+	/* Mario */
 	sprites[0] = new_Sprite("Mario", SIZE_32_64, 200, 69, 0, 0, 0, 0);
 	sprite_set_floor(sprites[0],69);
 
+	/* Megaman */
 	sprites[1] = new_Sprite("Megaman", SIZE_32_32, 100, 120, 1, 0, 384,0);
 	sprite_set_player(sprites[1]);
 
     
-    //number of bullets, 12 because sprite[2] is bullet
-    int bullets = 12;
-    // i is 2 because sprite[2] is first bullet
+    /* Bullets */
+    int bullets = 12; 	/* bullets start at sprites[2] */
     int z = 2;    
-    // initalize 10 bullets, just to start
     while (z <= bullets) {
         sprites[z] = new_Sprite("Bullet", SIZE_8_8, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 608, 0);
         sprite_animation_init(sprites[z], 608, 648, 0, 0, 0, 0, 0, 0);
-
         z++;
     }
-
 
 	/* sprite collisions */
 	sprite_collision_init(sprites[0],6, 25, 20, 64,40);
 	sprite_collision_init(sprites[1], 5, 27, 8, 32, 40);
-
 
 	/* sprite animations */
 	sprite_set_animation_delay(sprites[1],50);
@@ -436,31 +423,26 @@ int main( ) {
 	/* for clearing text */
 	volatile unsigned short * ptr = screen_block(28);
 
-	/* set initial scroll to 0 */
-	int xscroll = 0;
-	int sprite_scroll = 0;
-	int bulletTravel = 4;
-    int bulletDist = 140;
-    int fire = 0;
-    int has_moved = 0;
-    int collide;
-    int game_over_flag = 0;
+	int xscroll = 0;			/* set initial scroll to 0 */
+	int sprite_scroll = 0;		/* used to handle sprites outside of visible window */
+	int bulletTravel = 4;		/* bullet speed */
+    int bulletDist = 140;		/* maximum bullet distance */		
+    int has_moved = 0;			/* used to check whether a sprite has moved */
+    int collide = 1;			/* used to check bullet collision */
+    int game_over_flag = 0;		/* game over check */
 
 	/* AI vars */
-	int ai_move = 0;
-	int ai_jump = 0;
-    int marioHitCount = 1;
-    int marioKnockback = 0;
-	int shot_fired = 0;
-	int start_counter = 200;
-	int title_counter = 200;
-	int clear = 0;
-	int atk_timer = 0;
-	int tmp = 0;    //exits while loop for finding inactive bullet
+	int ai_move = 0;			/* AI decision-making */
+	int ai_jump = 0;			/* AI decision-making */
+    int marioHitCount = 1;		/* used for score */
+    int marioKnockback = 0;		/* knockback counter */	
+    int tmp = 0;    //exits while loop for finding inactive bullet
 
+    /* set characters off-screen */
 	sprite_set_pos(sprites[0],-64,74);
 	sprite_set_pos(sprites[1],-64,115);
 
+	/* text messages */
 	char score_text [5] = "Score";
 	char* score = "0";
 	char game_over_text [16] = "Game Over";
@@ -469,13 +451,14 @@ int main( ) {
 	 * title sequence        * =============================================================================
 	\*						 */
 
-
 	wait_vblank();
 	sprite_update_all();
 
+	/* clear any text */
 	delay(100000);
 	for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
 
+	/* dialogue */
 	char msg_02 [32]  = "You're in danger.";
 	set_text(msg_02, 13, 7); 
 
@@ -488,6 +471,7 @@ int main( ) {
 	delay(200000);
 	for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
 
+	/* Mario walks to center */
 	while (sprites[0]->x < SCREEN_WIDTH/2 - 20) {    
 		sprite_move_right(sprites[0]);
 		title_counter--;
@@ -496,12 +480,11 @@ int main( ) {
 			sprites_m[i] = sprites[i]->sprite_m;
 		}
 		wait_vblank();
-		//*bg0_x_scroll = xscroll/2;
-		//*bg1_x_scroll = xscroll*2;
 		sprite_update_all();
 		delay(800);
 	}
 
+	/* Mario stops walking */
 	sprite_move_none(sprites[0]);
 	for (int i = 0; i < NUM_SPRITES; i++) {
 			sprite_update(sprites[i],sprite_scroll);
@@ -509,32 +492,31 @@ int main( ) {
 	}
 
 	wait_vblank();
-		//*bg0_x_scroll = xscroll/2;
-		//*bg1_x_scroll = xscroll*2;
-		sprite_update_all();
-		delay(10000);
+	sprite_update_all();
+	delay(10000);
+	
+	/* Mario taunts */
 	char msg_04 [32] = "I'm gonna";
 	set_text(msg_04, 13, 16); 
 	char msg_05 [32] = "get you!";
 	set_text(msg_05, 14, 16); 
 
+	/* clear text */
 	delay(50000);
 	for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
 
+	/* start falling */
 	sprites[0]->falling = 1;
 	sprites[1]->falling = 1;
-
 	sprite_set_pos(sprites[0],200,-10);
 	sprite_set_pos(sprites[1],20,-10);
 
+	/* fall into start position */
 	while (sprites[1]->falling == 1) {    
-
-
 		for (int i = 0; i < NUM_SPRITES; i++) {
 			sprite_update(sprites[i],sprite_scroll);
 			sprites_m[i] = sprites[i]->sprite_m;
 		}
-
 		wait_vblank();
 		*bg0_x_scroll = xscroll/2;
 		*bg1_x_scroll = xscroll*2;
@@ -556,7 +538,6 @@ int main( ) {
 
         /* Scoreboard */
         for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
-//        score = toChar(marioHitCount);
         set_text(score_text, 1, 1);
         set_text_int(marioHitCount,2,1);
 
@@ -576,7 +557,7 @@ int main( ) {
 			break;
 		}
 
-		/* ? */
+		/* reset sprite scroll */
 		sprite_scroll = 0;
 	
 		/* User Controls */
@@ -594,23 +575,18 @@ int main( ) {
 			}
 			has_moved = 1;
 		} 		
-
-         /* shoot */
-        
+		/* shooting */
 		if (button_pressed(BUTTON_A)) {
-            //delays shooting 
             if (sprites[1]->lastFired > 0) {
                 sprites[1]->lastFired -= 1;
-            }
-            //sprites position array for bullet            
+            }     
             z = 2;
-        }
-            
+        }    
         while(z <= bullets && tmp == 0) {
             if (sprites[z]->bulletActive == 0) {
                  tmp = 1;
                  if (sprites[1]->lastFired == 0) {
-                    //sets bulletActive with assembly
+                 	/* sets bullet active state in ARM assembly code */
                     sprites[z]->bulletActive = activeBullet(sprites[z]->bulletActive); 
                     shoot(sprites[0], sprites[1], sprites[z], bulletTravel,bulletDist);
                     sprites[1]->lastFired = 5;
@@ -618,7 +594,6 @@ int main( ) {
             } 
             z++;
         }      
-            
         /* jump */
 		if (button_pressed(BUTTON_UP)) {
 				jump(sprites[1]);
@@ -629,13 +604,11 @@ int main( ) {
         z = 2;
         while (z <= bullets) {
             if (sprites[z]->bulletActive == 1) {
-
                 collide = mario_collide(sprites[z], sprites[0]);               
-                // for collision and knocking mario back when you hit him
+                /* knockback calculation */
                 if(collide == 0) {
-                   
-                   // update score, and knockback variables
-                   marioKnockback = stagger(marioKnockback);   // updates knockback with assembly
+                   /* assembly function to update knockback */
+                   marioKnockback = stagger(marioKnockback);
                    marioHitCount = update_hitCount(marioHitCount);
                    mario_knockdown(sprites[0], marioKnockback);
                 }
@@ -647,10 +620,10 @@ int main( ) {
 		/* sprite behavior */						
 		sprite_ai(sprites[0],sprites[1],ai_move,ai_jump);
         
+        /*check for game over */
 		if (sprite_check_collision(sprites[1],sprites[0]) == 1) {
 			game_over_flag = 1;
 		}
-
 
 		/* wait for vblank before scrolling and moving sprites */
 		wait_vblank();
@@ -667,10 +640,8 @@ int main( ) {
 	 * death sequence        * =============================================================================
 	\*						 */
 
-
-
 	/* jump */
-	sprites[1]->airtime = 10;
+	sprites[1]->airtime = 5;
 	sprites[1]->ymin = 180;
 
 	/* fall to death */
@@ -695,10 +666,7 @@ int main( ) {
 
 	while(1) {}
 
-
-
-
-}
+} /* end main */
 
 
 /* the game boy advance uses "interrupts" to handle certain situations
