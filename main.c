@@ -423,6 +423,7 @@ int main() {
 	/* for clearing text */
 	volatile unsigned short * ptr = screen_block(28);
 
+
 	int xscroll = 0;			/* set initial scroll to 0 */
 	int sprite_scroll = 0;		/* used to handle sprites outside of visible window */
 	int bulletTravel = 4;		/* bullet speed */
@@ -436,7 +437,7 @@ int main() {
 	int ai_jump = 0;			/* AI decision-making */
     int marioHitCount = 1;		/* used for score */
     int marioKnockback = 0;		/* knockback counter */	
-    int tmp = 0;    //exits while loop for finding inactive bullet
+	int exit_loop = 0;    		/* exits while loop for finding inactive bullet */
 
     /* set characters off-screen */
 	sprite_set_pos(sprites[0],-64,74);
@@ -474,7 +475,6 @@ int main() {
 	/* Mario walks to center */
 	while (sprites[0]->x < SCREEN_WIDTH/2 - 20) {    
 		sprite_move_right(sprites[0]);
-		title_counter--;
 		for (int i = 0; i < NUM_SPRITES; i++) {
 			sprite_update(sprites[i],sprite_scroll);
 			sprites_m[i] = sprites[i]->sprite_m;
@@ -531,10 +531,8 @@ int main() {
 	/* loop forever */
 	while (1) {
         collide = 1;
-        
-        shot_fired = 0;
         has_moved = 0;
-        tmp = 0;  //for shooting
+        exit_loop = 0;  //for leaving shooting loop
 
         /* Scoreboard */
         for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
@@ -581,10 +579,10 @@ int main() {
                 sprites[1]->lastFired -= 1;
             }     
             z = 2;
-        }    
-        while(z <= bullets && tmp == 0) {
+ 		}
+        while(z <= bullets && exit_loop == 0) {
             if (sprites[z]->bulletActive == 0) {
-                 tmp = 1;
+                 exit_loop = 1;
                  if (sprites[1]->lastFired == 0) {
                  	/* sets bullet active state in ARM assembly code */
                     sprites[z]->bulletActive = activeBullet(sprites[z]->bulletActive); 
@@ -593,7 +591,7 @@ int main() {
                  } 
             } 
             z++;
-        }      
+       	}
         /* jump */
 		if (button_pressed(BUTTON_UP)) {
 				jump(sprites[1]);
@@ -634,7 +632,7 @@ int main() {
 		/* delay some */
 		delay(400);
 
-	}
+	}	
 
 	/*						 *\
 	 * death sequence        * =============================================================================

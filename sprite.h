@@ -4,8 +4,6 @@
 #define JUMP_SPEED  5
 #define FALL_SPEED  5
 #define FLOOR       99
-#define POSMAX      260
-#define POSMIN      -64
 #define AI_WALKDELAY  10
 
 #include <stdlib.h>
@@ -53,20 +51,18 @@ struct Sprite {
 	int move; 				/* boolean, whether moving or not */
 	int border; 			/* pixel distance from edge of screen */
 	int falling; 			/* boolean, whether falling or not */
-	int facing;       /* which way sprite is facing */
-	char* name; 		/* callsign */
+	int facing;             /* which way sprite is facing */
+    char* name; 		    /* callsign */
+    int airtime;            /* jump air time */
+    int player;             
+    int scroll;
+    int move_timer;         /* mario AI move */
+    int jump_timer;         /* mario AI jump */
+    int ymin;               /* for floor sprites stand on */
+    int bulletActive;       /* if bullet is active */     
+    int distTravel;         /* for bullet distance traveled */
+	int lastFired;          /* for slowing down shooting speed */
 	
-	int airtime;
-	int player;
-	int scroll;
-	int move_timer;
-	int jump_timer;
-	int ymin;
-
-	
-	int bulletActive;       /* if bullet is active */     
-	int distTravel;         /* for bullet distance traveled */
-	int lastFired;
 	/* Animation Frames */
 	int frame_interval;
 	int walk_start;
@@ -307,49 +303,39 @@ void sprite_set_floor(struct Sprite* sprite, int y) {
 
 void sprite_update(struct Sprite* sprite, int xscroll) {
 
-	xscroll = xscroll * 2;
+    xscroll = xscroll * 2;
 
-	/* update y position and speed if falling */
-	if (sprite->airtime == 1) {
-	  sprite->airtime = 0;
-	  sprite->falling = 1;
-	}
-	else if (sprite->airtime > 0) {
-	  sprite->airtime -= 1;
-	  sprite->y -= JUMP_SPEED;
-	}
-	else if (sprite->falling) {
-		if ((sprite->y + FALL_SPEED) >= sprite->ymin) {
-		  sprite->falling = 0;
-		  sprite->y = sprite->ymin;
-		}
-		sprite->y += FALL_SPEED;
-	}
+    /* update y position and speed if falling */
+    if (sprite->airtime == 1) {
+      sprite->airtime = 0;
+      sprite->falling = 1;
+    }
+    else if (sprite->airtime > 0) {
+      sprite->airtime -= 1;
+      sprite->y -= JUMP_SPEED;
+    }
+    else if (sprite->falling) {
+        if ((sprite->y + FALL_SPEED) >= sprite->ymin) {
+          sprite->falling = 0;
+          sprite->y = sprite->ymin;
+        }
+        sprite->y += FALL_SPEED;
+    }
 
-	if (sprite->player != 1) {
-	  sprite->x = sprite->x + xscroll;
-	}
+    if (sprite->player != 1) {
+      sprite->x = sprite->x + xscroll;
+    }
 
-	if (sprite->x > POSMAX) {
-	  sprite->x = POSMAX;
-	  sprite->scroll += xscroll;
-	}
+    if (sprite->scroll > 0 && xscroll < 0) {
+      sprite->scroll += xscroll;
+    }
 
-	if (sprite->x < POSMIN) {
-	  sprite->x = POSMIN;
-	  sprite->scroll -= xscroll;
-	}
+    if (sprite->scroll < 0 && xscroll > 0) {
+      sprite->scroll += xscroll;
+    }
+    /* set on screen position */
+    sprite_position(sprite);
 
-	if (sprite->scroll > 0 && xscroll < 0) {
-	  sprite->scroll += xscroll;
-	}
-
-	if (sprite->scroll < 0 && xscroll > 0) {
-	  sprite->scroll += xscroll;
-	}
-
-	/* set on screen position */
-	sprite_position(sprite);
 }
 
 
@@ -418,7 +404,7 @@ void sprite_ai(struct Sprite* com, struct Sprite* player, int move, int jump) {
 	sprite_move_none(com);
   }
 
-  if (com->move_timer == 0 && move < 2) {
+  if (com->move_timer == 0 && move < 10) {
 	com->move_timer = 20;
   }
 
@@ -532,7 +518,7 @@ void mario_knockdown(struct Sprite* mario, int marioKnock) {
 
 int sprite_check_collision(struct Sprite* player, struct Sprite* target) {
 	if (player->x >= target->leftHit - 10 && player->x <= target->rightHit + 10 &&
-		player->y <= target->bottomHit + 10 && player->x >= target->topHit + 10) { return 1; } 
+		player->y <= target->bottomHit + 10 && player->y >= target->topHit - 10) { return 1; } 
 	return 0;
 }
 
