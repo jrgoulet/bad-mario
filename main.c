@@ -469,20 +469,20 @@ int main() {
 	sprite_update_all();
 
 	/* clear any text */
-	delay(100000);
+	delay(50000);
 	for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
 
 	/* dialogue */
 	char msg_02 [32]  = "You're in danger.";
 	set_text(msg_02, 13, 7); 
 
-	delay(200000);
+	delay(50000);
 	for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
 
 	char msg_03 [32] = "Don't let Mario touch you...";
 	set_text(msg_03, 13, 1); 
 
-	delay(200000);
+	delay(50000);
 	for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
 
 	/* Mario walks to center */
@@ -534,6 +534,7 @@ int main() {
 			sprite_set_floor(sprites[0],69);
 			sprites[0]->falling = 1;
 			sprites[1]->falling = 1;
+			sprite_set_vertical_flip(sprites[1],0);
 			sprite_set_pos(sprites[0],200,-10);
 			sprite_set_pos(sprites[1],20,-10);
 
@@ -654,10 +655,12 @@ int main() {
 			/* jump */
 			sprites[1]->airtime = 5;
 			sprites[1]->ymin = 180;
+			sprite_set_pos(sprites[0],-64,74);
 
 			/* fall to death */
 			while (sprites[1]->y < sprites[1]->ymin) {
 				for (int i = 0; i < NUM_SPRITES; i++) {
+					sprite_set_vertical_flip(sprites[1],1);
 					sprite_update(sprites[i],sprite_scroll);
 					sprites_m[i] = sprites[i]->sprite_m;
 				}
@@ -686,7 +689,7 @@ int main() {
 	 * death sequence        * =============================================================================
 	\*						 */
 
-	delay(80000);
+	delay(40000);
 
 	*display_control = MODE3 | BG2_ENABLE;
 	
