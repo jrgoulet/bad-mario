@@ -515,15 +515,10 @@ void mario_knockdown(struct Sprite* mario, int marioKnock) {
 }
 
 int sprite_check_collision(struct Sprite* player, struct Sprite* target) {
-<<<<<<< HEAD
 	if (player->x >= target->leftHit - 10 && player->x <= target->rightHit + 10 &&
 		player->y <= target->bottomHit + 10 && player->y >= target->topHit - 10) { return 1; } 
 	return 0;
-=======
-    if (player->x >= target->leftHit - 10 && player->x <= target->rightHit + 10 &&
-            player->y <= target->bottomHit + 10 && player->x >= target->topHit + 10) { return 1; } 
-    return 0;
->>>>>>> 44bfcc37b648b12275e33d59eda09deb93117983
+
 }
 
 
