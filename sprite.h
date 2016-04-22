@@ -4,8 +4,6 @@
 #define JUMP_SPEED  5
 #define FALL_SPEED  5
 #define FLOOR       99
-#define POSMAX      260
-#define POSMIN      -64
 #define AI_WALKDELAY  10
 
 #include <stdlib.h>
@@ -55,15 +53,12 @@ struct Sprite {
 	int falling; 			/* boolean, whether falling or not */
 	int facing;             /* which way sprite is facing */
     char* name; 		    /* callsign */
-    
-    int airtime;
-    int player;
+    int airtime;            /* jump air time */
+    int player;             
     int scroll;
-    int move_timer;
-    int jump_timer;
-    int ymin;
-
-    
+    int move_timer;         /* mario AI move */
+    int jump_timer;         /* mario AI jump */
+    int ymin;               /* for floor sprites stand on */
     int bulletActive;       /* if bullet is active */     
     int distTravel;         /* for bullet distance traveled */
 	int lastFired;          /* for slowing down shooting speed */
@@ -331,16 +326,6 @@ void sprite_update(struct Sprite* sprite, int xscroll) {
       sprite->x = sprite->x + xscroll;
     }
 
-    if (sprite->x > POSMAX) {
-      sprite->x = POSMAX;
-      sprite->scroll += xscroll;
-    }
-
-    if (sprite->x < POSMIN) {
-      sprite->x = POSMIN;
-      sprite->scroll -= xscroll;
-    }
-
     if (sprite->scroll > 0 && xscroll < 0) {
       sprite->scroll += xscroll;
     }
@@ -350,49 +335,7 @@ void sprite_update(struct Sprite* sprite, int xscroll) {
     }
     /* set on screen position */
     sprite_position(sprite);
-//	xscroll = xscroll * 2;
 
-	/* update y position and speed if falling */
-/*	if (sprite->airtime == 1) {
-	  sprite->airtime = 0;
-	  sprite->falling = 1;
-	}
-	else if (sprite->airtime > 0) {
-	  sprite->airtime -= 1;
-	  sprite->y -= JUMP_SPEED;
-	}
-	else if (sprite->falling) {
-		if ((sprite->y + FALL_SPEED) >= sprite->ymin) {
-		  sprite->falling = 0;
-		  sprite->y = sprite->ymin;
-		}
-		sprite->y += FALL_SPEED;
-	}
-
-	if (sprite->player != 1) {
-	  sprite->x = sprite->x + xscroll;
-	}
-
-	if (sprite->x > POSMAX) {
-	  sprite->x = POSMAX;
-	  sprite->scroll += xscroll;
-	}
-
-	if (sprite->x < POSMIN) {
-	  sprite->x = POSMIN;
-	  sprite->scroll -= xscroll;
-	}
-
-	if (sprite->scroll > 0 && xscroll < 0) {
-	  sprite->scroll += xscroll;
-	}
-
-	if (sprite->scroll < 0 && xscroll > 0) {
-	  sprite->scroll += xscroll;
-	}
-*/
-	/* set on screen position */
-//	sprite_position(sprite);
 }
 
 
