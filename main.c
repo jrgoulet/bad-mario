@@ -353,6 +353,16 @@ void setup_sprite_image() {
 int exit_title() {
 	for (int i = 0; i < 80000; i++) {
 		if (button_pressed(BUTTON_A)) return 1;
+		if (button_pressed(BUTTON_START)) return 1;
+	}
+	return 0;
+}
+
+int restart_game() {
+	while(1) {
+		if (button_pressed(BUTTON_A)) return 1;
+		if (button_pressed(BUTTON_START)) return 1;
+		if (button_pressed(BUTTON_B)) return 0;
 	}
 	return 0;
 }
@@ -438,6 +448,8 @@ int main() {
     int marioHitCount = 1;		/* used for score */
     int marioKnockback = 0;		/* knockback counter */	
 	int exit_loop = 0;    		/* exits while loop for finding inactive bullet */
+	int restart = 1;			/* in-game restart */
+	int play_again = 1;			/* continue? */
 
     /* set characters off-screen */
 	sprite_set_pos(sprites[0],-64,74);
@@ -447,6 +459,7 @@ int main() {
 	char score_text [5] = "Score";
 	char* score = "0";
 	char game_over_text [16] = "Game Over";
+	char continue_text [16]	 = "Continue?";
 
 	/*						 *\
 	 * title sequence        * =============================================================================
@@ -505,31 +518,39 @@ int main() {
 	delay(50000);
 	for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
 
-	/* start falling */
-	sprites[0]->falling = 1;
-	sprites[1]->falling = 1;
-	sprite_set_pos(sprites[0],200,-10);
-	sprite_set_pos(sprites[1],20,-10);
-
-	/* fall into start position */
-	while (sprites[1]->falling == 1) {    
-		for (int i = 0; i < NUM_SPRITES; i++) {
-			sprite_update(sprites[i],sprite_scroll);
-			sprites_m[i] = sprites[i]->sprite_m;
-		}
-		wait_vblank();
-		*bg0_x_scroll = xscroll/2;
-		*bg1_x_scroll = xscroll*2;
-		sprite_update_all();
-		delay(800);
-	}
-
 	/*						 *\
 	 * main sequence         * =============================================================================
 	\*						 */
 
 	/* loop forever */
-	while (1) {
+	while (play_again == 1) {
+
+		if (restart == 1) {
+			marioHitCount = 0;
+			restart = 0;
+
+			/* start falling */
+			sprite_set_floor(sprites[1],99);
+			sprite_set_floor(sprites[0],69);
+			sprites[0]->falling = 1;
+			sprites[1]->falling = 1;
+			sprite_set_pos(sprites[0],200,-10);
+			sprite_set_pos(sprites[1],20,-10);
+
+			/* fall into start position */
+			while (sprites[1]->falling == 1) {    
+				for (int i = 0; i < NUM_SPRITES; i++) {
+					sprite_update(sprites[i],sprite_scroll);
+					sprites_m[i] = sprites[i]->sprite_m;
+				}
+				wait_vblank();
+				*bg0_x_scroll = xscroll/2;
+				*bg1_x_scroll = xscroll*2;
+				sprite_update_all();
+				delay(800);
+			}
+		}
+
         collide = 1;
         has_moved = 0;
         exit_loop = 0;  //for leaving shooting loop
@@ -547,12 +568,6 @@ int main() {
 		for (int i = 0; i < NUM_SPRITES; i++) {
 			sprite_update(sprites[i],sprite_scroll);
 			sprites_m[i] = sprites[i]->sprite_m;
-		}
-
-		/* check game_over */
-		if (game_over_flag == 1) {
-			set_text(game_over_text, 3, 1); 
-			break;
 		}
 
 		/* reset sprite scroll */
@@ -592,6 +607,7 @@ int main() {
             } 
             z++;
        	}
+
         /* jump */
 		if (button_pressed(BUTTON_UP)) {
 				jump(sprites[1]);
@@ -632,29 +648,44 @@ int main() {
 		/* delay some */
 		delay(400);
 
+		/* check game_over */
+		if (game_over_flag == 1) {
+
+			/* jump */
+			sprites[1]->airtime = 5;
+			sprites[1]->ymin = 180;
+
+			/* fall to death */
+			while (sprites[1]->y < sprites[1]->ymin) {
+				for (int i = 0; i < NUM_SPRITES; i++) {
+					sprite_update(sprites[i],sprite_scroll);
+					sprites_m[i] = sprites[i]->sprite_m;
+				}
+				wait_vblank();
+				*bg0_x_scroll = xscroll/2;
+				*bg1_x_scroll = xscroll*2;
+				sprite_update_all();
+				delay(5000);
+			}
+
+			set_text(game_over_text,13,9); 
+			delay(50000);
+			for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
+			set_text(continue_text, 13,9);
+			restart = restart_game();
+			if (restart == 1) play_again = 1;
+			else play_again = 0;
+			for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
+			game_over_flag = 0;
+		}
+
+
 	}	
 
 	/*						 *\
 	 * death sequence        * =============================================================================
 	\*						 */
 
-	/* jump */
-	sprites[1]->airtime = 5;
-	sprites[1]->ymin = 180;
-
-	/* fall to death */
-	while (sprites[1]->y < sprites[1]->ymin) {
-		for (int i = 0; i < NUM_SPRITES; i++) {
-			sprite_update(sprites[i],sprite_scroll);
-			sprites_m[i] = sprites[i]->sprite_m;
-		}
-		wait_vblank();
-		*bg0_x_scroll = xscroll/2;
-		*bg1_x_scroll = xscroll*2;
-		sprite_update_all();
-		delay(5000);
-	}
-	
 	delay(80000);
 
 	*display_control = MODE3 | BG2_ENABLE;
