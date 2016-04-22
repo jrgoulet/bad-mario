@@ -252,6 +252,7 @@ void sprite_position(struct Sprite* sprite) {
 
 /* move a sprite in a direction */
 void sprite_move(struct Sprite* sprite, int dx, int dy) {
+
     /* get the current y coordinate */
     int y = sprite->sprite_m.attribute0 & 0xff;
 
@@ -403,10 +404,10 @@ void sprite_ai(struct Sprite* com, struct Sprite* player, int move, int jump) {
     if (com->move_timer == 0) {
         sprite_move_none(com);
     }
-    if (com->move_timer == 0 && move < 10) {
+    if (com->move_timer == 0 && move < 20) {
     	com->move_timer = 20;
     }
-    if (com->jump_timer == 0 && jump < 1) {
+    if (com->jump_timer == 0 && jump < 3) {
         com->jump_timer = 20;
     }
 

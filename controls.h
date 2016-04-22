@@ -32,7 +32,8 @@ int move_left(struct Sprite* sprite) {
     } else {
         /* else move left */
 
-        sprite->x--; 
+        sprite->x--;
+        if (sprite->airtime > 0) sprite->x -= 3;
         sprite_position(sprite);
         return 0;
     }
@@ -60,6 +61,7 @@ int move_right(struct Sprite* sprite) {
         /* else move right */
 
         sprite->x++; 
+        if (sprite->airtime > 0) sprite->x += 3;
         sprite_position(sprite);
         return 0;
     }
@@ -76,7 +78,7 @@ void move_none(struct Sprite* sprite) {
 
 void jump(struct Sprite* sprite) {
     if (sprite->airtime == 0 && sprite->falling == 0) {
-        sprite->airtime = 20;
+        sprite->airtime = 30;
     }
 }
 

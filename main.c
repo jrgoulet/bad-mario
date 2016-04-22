@@ -674,7 +674,7 @@ int main() {
 			set_text(game_over_text,13,9); 
 			delay(50000);
 			for (int i = 0; i < 32 * 32; i++) { ptr[i] = 0; }
-			set_text(continue_text, 13,9);
+			set_text(continue_text, 13,10);
 			restart = restart_game();
 			if (restart == 1) play_again = 1;
 			else play_again = 0;
